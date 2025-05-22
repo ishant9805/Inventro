@@ -1,33 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:inventro/app/modules/auth/views/manager/dashboard.dart';
-// Import app routes
-import 'package:inventro/app/modules/auth/views/manager/login_screen.dart';  // Import login screen
-import 'package:inventro/app/modules/auth/views/manager/register_screen.dart';  // Import register screen
-import 'package:inventro/app/modules/auth/controller/auth_controller.dart';  // Import AuthController for authentication logic
+import 'package:inventro/app/routes/app_routes.dart';
+import 'package:inventro/app/routes/app_pages.dart';
+import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 
 void main() {
-  runApp(MyApp());
+  // Register your AuthController globally
+  Get.put(AuthController());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // Initialize the AuthController globally to handle state and logic
-  // ignore: unused_field
-  final AuthController _authController = Get.put(AuthController());
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Inventro App',
-      initialRoute: '/login',  // Set login screen as initial route
-      getPages: [
-        // Define app routes
-        GetPage(name: '/login', page: () => LoginScreen()),  // Login screen route
-        GetPage(name: '/register', page: () => RegisterScreen()),  // Register screen route
-        GetPage(name: '/dashboard', page: () => ManagerDashboard()),  // Dashboard screen route (can be any screen)
-      ],
+      initialRoute: AppRoutes.splash, // Use AppRoutes.splash or AppRoutes.managerLogin
+      getPages: AppPages.pages,       // Use the list from app_pages.dart
       debugShowCheckedModeBanner: false,
     );
   }
 }
-
