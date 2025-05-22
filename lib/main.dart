@@ -17,8 +17,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Inventro App',
-      initialRoute: AppRoutes.splash, // Use AppRoutes.splash or AppRoutes.managerLogin
-      getPages: AppPages.pages,       // Use the list from app_pages.dart
+      initialRoute: AppRoutes.splash, 
+      getPages: AppPages.pages,       
       debugShowCheckedModeBanner: false,
     );
   }

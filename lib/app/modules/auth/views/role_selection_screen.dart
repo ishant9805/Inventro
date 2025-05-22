@@ -13,7 +13,7 @@ class RoleSelectionScreen extends StatelessWidget {
       Color(0xFF00C3FF), // Cyan
       Color(0xFF8F00FF), // Purple
     ];
-    final List<Color> lightColors = baseColors.map((c) => c.withOpacity(0.7)).toList();
+    final List<Color> lightColors = baseColors.map((c) => c.withValues(alpha: 0.8)).toList();
 
     return Scaffold(
       body: Container(
@@ -30,15 +30,14 @@ class RoleSelectionScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
             decoration: BoxDecoration(
-              color: Colors.white.withAlpha(7),
+              color: Colors.white.withAlpha(210),
               borderRadius: BorderRadius.circular(32),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+                 BoxShadow(
+                   color: Colors.black.withValues(alpha: 0.2),
+                   offset: const Offset(0, 4),
+                 ),
+               ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,

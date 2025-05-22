@@ -1,61 +1,163 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
+import 'package:inventro/app/routes/app_routes.dart';
 
 class LoginScreen extends StatelessWidget {
-  final AuthController authController = Get.find<AuthController>();
-
   LoginScreen({super.key});
+
+  final AuthController authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
+    // Lighter gradient colors for background
+    const List<Color> baseColors = [
+      Color(0xFF4A00E0),
+      Color(0xFF00C3FF),
+      Color(0xFF8F00FF),
+    ];
+    final List<Color> lightColors = baseColors.map((c) => c.withValues(alpha: 170)).toList();
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Email Field - Using controller's TextEditingController
-            TextField(
-              controller: authController.emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () {
+            Get.offAllNamed(AppRoutes.roleSelection);
+          },
+          tooltip: "Back to Role Selection",
+        ),
+      ),
+      extendBodyBehindAppBar: true,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: lightColors,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 210),
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.5), // 0.3*255 ≈ 77
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 20),
-            // Password Field - Using controller's TextEditingController
-            TextField(
-              controller: authController.passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // App Title
+                  const Text(
+                    'Manager Login',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  // Email Field
+                  TextField(
+                    controller: authController.emailController,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.email_outlined),
+                      labelText: 'Email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      ),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 18),
+                  // Password Field
+                  TextField(
+                    controller: authController.passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.lock_outline),
+                      labelText: 'Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Forgot Password Button
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        // TODO: Implement forgot password navigation
+                        Get.snackbar("Forgot Password", "Password reset coming soon!");
+                      },
+                      child: const Text(
+                        "Forgot Password?",
+                        style: TextStyle(
+                          color: Color(0xFF4A00E0),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Login Button
+                  Obx(() => ElevatedButton(
+                        onPressed: authController.isLoading.value
+                            ? null
+                            : authController.loginManager,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          backgroundColor: const Color(0xFF4A00E0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(fontSize: 18),
+                        ),
+                        child: authController.isLoading.value
+                            ? const CircularProgressIndicator()
+                            : const Text('Login',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),                            
+                              ),
+                    ),),
+                  const SizedBox(height: 18),
+                  // Register Prompt
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account? "),
+                      GestureDetector(
+                        onTap: () => Get.toNamed(AppRoutes.register),
+                        child: const Text(
+                          "Register",
+                          style: TextStyle(
+                            color: Color(0xFF4A00E0),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 30),
-            // Login Button
-            Obx(() => ElevatedButton(
-              onPressed: authController.isLoading.value 
-                  ? null 
-                  : () => authController.loginManager(),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-              ),
-              child: authController.isLoading.value
-                  ? const CircularProgressIndicator()
-                  : const Text('Login', style: TextStyle(fontSize: 16)),
-            )),
-            const SizedBox(height: 20),
-            TextButton(
-              onPressed: () {
-                Get.toNamed('/register');
-              },
-              child: const Text('Don\'t have an account? Register'),
-            ),
-          ],
+          ),
         ),
       ),
     );
