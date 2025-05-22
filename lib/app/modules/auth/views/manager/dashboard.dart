@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controller/auth_controller.dart';
 
 class ManagerDashboard extends StatelessWidget {
   const ManagerDashboard({super.key});
@@ -28,15 +29,37 @@ class ManagerDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get access to the AuthController
+    final AuthController authController = Get.find<AuthController>();
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manager Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, color: Colors.red,),
             onPressed: () {
-              // Placeholder for logout
-              Get.snackbar('Logout', 'Logout functionality coming soon!');
+              // Show confirmation dialog
+              Get.dialog(
+                AlertDialog(
+                  title: const Text('Logout'),
+                  content: const Text('Are you sure you want to logout?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Get.back(),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Get.back();
+                        // Call the logout method from AuthController
+                        Get.find<AuthController>().logout();
+                      },
+                      child: const Text('Logout'),
+                    ),
+                  ],
+                ),
+              );
             },
           ),
         ],
@@ -47,10 +70,10 @@ class ManagerDashboard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Welcome Header
-            const Text(
-              'Welcome, Manager!',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
+            Obx(() => Text(
+              'Welcome, ${authController.user.value?.name ?? "Manager"}!',
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            )),
             const SizedBox(height: 20),
 
             // Action Buttons Row

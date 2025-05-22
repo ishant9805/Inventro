@@ -64,8 +64,10 @@ class RoleSelectionScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.person),
-                  label: const Text("Employee Login"),
+                  icon: const Icon(Icons.person, color: Colors.white),
+                  label: const Text("Employee Login",
+                  style: TextStyle(color: Colors.white),                  
+                  ),
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(220, 50),
                     backgroundColor: Colors.deepPurpleAccent,

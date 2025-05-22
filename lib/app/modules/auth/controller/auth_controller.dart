@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/models/user_model.dart';
+import '../../../routes/app_routes.dart';
 
 class AuthController extends GetxController {
   // Input fields for login and registration
@@ -44,7 +45,7 @@ class AuthController extends GetxController {
       clearTextControllers();
 
       // Navigate to Login page
-      Get.offAllNamed('/login');
+      Get.offAllNamed(AppRoutes.login);
 
     } catch (e) {
       Get.snackbar("Error", e.toString());
@@ -66,11 +67,14 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Call login API
-      final result = await _authService.login(email, password);
-
-      // Set logged in user
-      user.value = result;
+      // Step 1: Call login API to get token
+      final tokenResult = await _authService.login(email, password);
+      
+      // Step 2: Use the token to fetch complete user profile
+      final userProfile = await _authService.fetchUserProfile(tokenResult.token);
+      
+      // Step 3: Set the complete user profile in state
+      user.value = userProfile;
 
       Get.snackbar("Success", "Login successful!");
 
@@ -79,7 +83,7 @@ class AuthController extends GetxController {
       passwordController.clear();
 
       // Navigate to Manager Dashboard
-      Get.offAllNamed('/manager-dashboard');
+      Get.offAllNamed(AppRoutes.dashboard);
 
     } catch (e) {
       Get.snackbar("Login Failed", e.toString());
@@ -90,9 +94,20 @@ class AuthController extends GetxController {
 
   // --- LOGOUT MANAGER ---
   void logout() {
+    // Clear user data
     user.value = null;
     clearTextControllers();
-    Get.offAllNamed('/login');
+    
+    // Show success message
+    Get.snackbar(
+      "Logout Successful", 
+      "You have been logged out successfully",
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2)
+    );
+    
+    // Navigate to role selection screen
+    Get.offAllNamed(AppRoutes.roleSelection);
   }
 
   // --- Clear all TextControllers ---
