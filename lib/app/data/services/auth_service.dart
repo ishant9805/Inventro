@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import '../../modules/auth/controller/auth_controller.dart';
 
 class AuthService {
-  final String baseUrl = 'https://d0d8-2401-4900-3b0e-b89-ac40-fdc0-95ff-a784.ngrok-free.app';
+  final String baseUrl = 'https://0332-117-96-145-115.ngrok-free.app/';
 
   // Helper method to get auth headers with token
   Map<String, String> getAuthHeaders() {
@@ -57,8 +57,8 @@ class AuthService {
       },
     );
     
-    //print(response.statusCode);
-    //print(response.body);
+    print(response.statusCode);
+    print(response.body);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
