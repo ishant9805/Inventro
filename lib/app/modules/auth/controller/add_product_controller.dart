@@ -38,19 +38,43 @@ class AddProductController extends GetxController {
     if (_validateFields()) {
       isLoading.value = true;
       try {
-        await _productService.addProduct({
+        // Prepare data according to backend schema
+        final productData = {
           'part_number': partNumberController.text.trim(),
           'description': descriptionController.text.trim(),
           'location': locationController.text.trim(),
           'quantity': int.tryParse(quantityController.text.trim()) ?? 0,
           'batch_number': batchNumberController.text.trim(),
           'expiry_date': expiryDateController.text.trim(),
-          'updated_on': updatedOnController.text.trim(),
-        });
-        Get.snackbar('Success', 'Product added successfully');
+        };
+
+        print('Submitting product data: $productData');
+
+        final result = await _productService.addProduct(productData);
+        
+        Get.snackbar(
+          'Success', 
+          'Product "${partNumberController.text.trim()}" added successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withOpacity(0.1),
+          colorText: Colors.green[800],
+          duration: const Duration(seconds: 3),
+        );
+        
         _clearFields();
+        
+        print('Product added successfully: $result');
+        
       } catch (e) {
-        Get.snackbar('Error', e.toString());
+        print('Error adding product: $e');
+        Get.snackbar(
+          'Error', 
+          e.toString().replaceAll('Exception: ', ''),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.1),
+          colorText: Colors.red[800],
+          duration: const Duration(seconds: 4),
+        );
       } finally {
         isLoading.value = false;
       }
@@ -72,6 +96,10 @@ class AddProductController extends GetxController {
     }
     if (quantityController.text.trim().isEmpty) {
       Get.snackbar('Error', 'Quantity is required');
+      return false;
+    }
+    if (int.tryParse(quantityController.text.trim()) == null || int.parse(quantityController.text.trim()) < 0) {
+      Get.snackbar('Error', 'Please enter a valid quantity (0 or greater)');
       return false;
     }
     if (batchNumberController.text.trim().isEmpty) {

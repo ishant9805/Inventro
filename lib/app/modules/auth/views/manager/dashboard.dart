@@ -3,37 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/routes/app_routes.dart';
 import '../../controller/auth_controller.dart';
+import '../../controller/dashboard_controller.dart';
 //import '../../../../routes/app_routes.dart';
 
 class ManagerDashboard extends StatelessWidget {
   const ManagerDashboard({super.key});
 
-  // Mock data for products/inventory
-  List<Map<String, String>> get mockProducts => [
-        {
-          'name': 'Spare Part A',
-          'category': 'Mechanical',
-          'quantity': '12',
-          'location': 'Hangar 1',
-        },
-        {
-          'name': 'Tool Kit B',
-          'category': 'Electrical',
-          'quantity': '5',
-          'location': 'Workshop',
-        },
-        {
-          'name': 'Fire Extinguisher',
-          'category': 'Safety',
-          'quantity': '20',
-          'location': 'Terminal',
-        },
-      ];
-
   @override
   Widget build(BuildContext context) {
     // Get access to the AuthController
     final AuthController authController = Get.find<AuthController>();
+    // Initialize DashboardController
+    final DashboardController dashboardController = Get.put(DashboardController());
     
     // Gradient colors for background
     const List<Color> baseColors = [
@@ -49,6 +30,11 @@ class ManagerDashboard extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.blue),
+            onPressed: () => dashboardController.refreshProducts(),
+            tooltip: "Refresh Products",
+          ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.red),
             onPressed: () {
@@ -126,7 +112,7 @@ class ManagerDashboard extends StatelessWidget {
                         icon: Icons.person_add_alt_1,
                         label: 'Add Employee',
                         color: Colors.deepPurple,
-                        onTap: () => Get.offAllNamed(AppRoutes.addEmployee), // Get.offAllNamed(AppRoutes.roleSelection);Navigate to Add Employee screen
+                        onTap: () => Get.offAllNamed(AppRoutes.addEmployee),
                       ),
                       const SizedBox(width: 12),
                       _SmallDashboardButton(
@@ -155,75 +141,281 @@ class ManagerDashboard extends StatelessWidget {
                 
                 const SizedBox(height: 24),
                 
+                // Product Statistics Cards
+                Obx(() => Row(
+                  children: [
+                    Expanded(
+                      child: _StatCard(
+                        title: 'Total Products',
+                        value: '${dashboardController.products.length}',
+                        icon: Icons.inventory,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StatCard(
+                        title: 'Low Stock',
+                        value: '${dashboardController.lowStockProducts.length}',
+                        icon: Icons.warning,
+                        color: Colors.orange,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StatCard(
+                        title: 'Expiring Soon',
+                        value: '${dashboardController.expiringProducts.length}',
+                        icon: Icons.schedule,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                )),
+                
+                const SizedBox(height: 24),
+                
                 // Inventory/Product List Header
-                const Text(
-                  'Inventory List',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Inventory List',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
+                    Obx(() => dashboardController.isLoading.value 
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 
-                // Inventory/Product List
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: mockProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = mockProducts[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                        border: const Border(
-                          bottom: BorderSide(
-                            color: Colors.red,
-                            width: 5.0,
-                          ),
+                // Product List
+                Obx(() {
+                  if (dashboardController.isLoading.value && dashboardController.products.isEmpty) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  
+                  if (dashboardController.products.isEmpty) {
+                    return Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Column(
+                          children: [
+                            Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[400]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No products found',
+                              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Add your first product to get started',
+                              style: TextStyle(color: Colors.grey[500]),
+                            ),
+                          ],
                         ),
                       ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(12),
-                        leading: const CircleAvatar(
-                          backgroundColor: Color(0xFFECE6FF),
-                          child: Icon(Icons.inventory_2, color: Colors.deepPurple),
-                        ),
-                        title: Text(
-                          product['name'] ?? '',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          'Category: ${product['category']}\nLocation: ${product['location']}',
-                        ),
-                        trailing: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.deepPurple.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            'Qty: ${product['quantity']}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.deepPurple,
+                    );
+                  }
+                  
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: dashboardController.products.length,
+                    itemBuilder: (context, index) {
+                      final product = dashboardController.products[index];
+                      final isExpired = product.isExpired;
+                      final isLowStock = product.quantity <= 10;
+                      final isExpiringSoon = product.daysUntilExpiry <= 30 && !isExpired;
+                      
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                          border: Border(
+                            bottom: BorderSide(
+                              color: isExpired 
+                                ? Colors.red 
+                                : isExpiringSoon 
+                                  ? Colors.orange 
+                                  : isLowStock 
+                                    ? Colors.yellow[700]! 
+                                    : Colors.green,
+                              width: 5.0,
                             ),
                           ),
                         ),
-                        onTap: () => Get.snackbar('Product', 'Product details coming soon!'),
-                      ),
-                    );
-                  },
-                ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(12),
+                          leading: CircleAvatar(
+                            backgroundColor: const Color(0xFFECE6FF),
+                            child: Text(
+                              product.partNumber.isNotEmpty 
+                                ? product.partNumber.substring(0, 1).toUpperCase()
+                                : 'P',
+                              style: const TextStyle(
+                                color: Colors.deepPurple,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          title: Text(
+                            product.partNumber,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Description: ${product.description}'),
+                              Text('Location: ${product.location}'),
+                              Text('Batch: ${product.batchNumber}'),
+                              Text('Expires: ${product.formattedExpiryDate}'),
+                              if (isExpired)
+                                const Text(
+                                  'EXPIRED',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              else if (isExpiringSoon)
+                                Text(
+                                  'Expires in ${product.daysUntilExpiry} days',
+                                  style: const TextStyle(
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                                decoration: BoxDecoration(
+                                  color: isLowStock 
+                                    ? Colors.orange.withOpacity(0.1)
+                                    : Colors.deepPurple.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  'Qty: ${product.quantity}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: isLowStock ? Colors.orange[800] : Colors.deepPurple,
+                                  ),
+                                ),
+                              ),
+                              if (isLowStock)
+                                const Text(
+                                  'LOW STOCK',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.orange,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          onTap: () {
+                            // Show product details dialog
+                            _showProductDetails(context, product, dashboardController);
+                          },
+                        ),
+                      );
+                    },
+                  );
+                }),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showProductDetails(BuildContext context, product, DashboardController controller) {
+    Get.dialog(
+      AlertDialog(
+        title: Text(product.partNumber),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Description: ${product.description}'),
+            Text('Location: ${product.location}'),
+            Text('Quantity: ${product.quantity}'),
+            Text('Batch Number: ${product.batchNumber}'),
+            Text('Expiry Date: ${product.formattedExpiryDate}'),
+            if (product.isExpired)
+              const Text(
+                'Status: EXPIRED',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              )
+            else if (product.daysUntilExpiry <= 30)
+              Text(
+                'Status: Expires in ${product.daysUntilExpiry} days',
+                style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+              )
+            else
+              const Text(
+                'Status: Good',
+                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Close'),
+          ),
+          if (product.id != null)
+            TextButton(
+              onPressed: () {
+                Get.back();
+                Get.dialog(
+                  AlertDialog(
+                    title: const Text('Delete Product'),
+                    content: Text('Are you sure you want to delete "${product.partNumber}"?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Get.back(),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Get.back();
+                          controller.deleteProduct(product.id);
+                        },
+                        child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+        ],
       ),
     );
   }
@@ -278,6 +470,56 @@ class _SmallDashboardButton extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// Stat Card Widget
+class _StatCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Icon(icon, size: 32, color: color),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
