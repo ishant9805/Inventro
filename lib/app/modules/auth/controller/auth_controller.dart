@@ -36,7 +36,7 @@ class AuthController extends GetxController {
         "company_name": companyNameController.text.trim(),
         "company_size": int.tryParse(numberOfEmployeesController.text.trim()) ?? 0,
         "phone": "string",
-        "profile_picture": "string"
+        "profile_picture": "string",
       };
 
       await _authService.registerAdmin(body);
@@ -122,6 +122,7 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
+    // Dispose all TextEditingControllers to avoid memory leaks
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
@@ -130,5 +131,9 @@ class AuthController extends GetxController {
     numberOfEmployeesController.dispose();
     super.onClose();
   }
+
+  // --- Splash Screen Optimization Note ---
+  // Avoid heavy initialization in splash screen. If you need to load data, do it asynchronously
+  // and show a loading indicator. Keep splash screen logic lightweight.
 }
 // This controller handles the authentication logic for the app, including login and registration.

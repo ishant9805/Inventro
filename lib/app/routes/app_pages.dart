@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:inventro/app/modules/auth/views/manager/add_employee_screen.dart';
+import 'package:inventro/app/modules/auth/views/manager/add_product_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/dashboard.dart';
 import 'package:inventro/app/modules/auth/views/role_selection_screen.dart';
 import 'package:inventro/app/modules/auth/views/splash_screen.dart';
@@ -30,5 +32,13 @@ class AppPages {
      name: AppRoutes.dashboard,
      page: () => ManagerDashboard(),   // will create later after login
    ),
+    GetPage(
+      name: AppRoutes.addEmployee,
+      page: () => AddEmployeeScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.addProduct,
+      page: () => AddProductScreen(),
+    ),
   ];
 }

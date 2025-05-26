@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 import 'package:inventro/app/routes/app_routes.dart';
+import '../../controller/add_product_controller.dart';
 
-class RegisterScreen extends StatelessWidget {
-  RegisterScreen({super.key});
+class AddProductScreen extends StatelessWidget {
+  AddProductScreen({super.key});
 
-  final AuthController authController = Get.find<AuthController>();
+  final AddProductController controller = Get.put(AddProductController());
 
   @override
   Widget build(BuildContext context) {
-    // Lighter gradient colors for background
     const List<Color> baseColors = [
       Color(0xFF4A00E0),
       Color(0xFF00C3FF),
       Color(0xFF8F00FF),
     ];
-    final List<Color> lightColors = baseColors.map((c) => c.withValues(alpha: 170)).toList();
+    final List<Color> lightColors = baseColors.map((c) => c.withAlpha(170)).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -25,11 +24,11 @@ class RegisterScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () {
-            Get.offAllNamed(AppRoutes.roleSelection);
+            Get.offAllNamed(AppRoutes.dashboard);
           },
-          tooltip: "Back to Role Selection",
+          tooltip: "Back to Dashboard",
         ),
-        // Remove the title from app bar
+        iconTheme: const IconThemeData(color: Colors.black87),
       ),
       extendBodyBehindAppBar: true,
       body: Container(
@@ -48,11 +47,11 @@ class RegisterScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
               margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 210),
+                color: Colors.white.withAlpha(210),
                 borderRadius: BorderRadius.circular(32),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Colors.black.withAlpha(50),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -62,7 +61,7 @@ class RegisterScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Manager Registration',
+                    'Add Product',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 26,
@@ -72,12 +71,12 @@ class RegisterScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  // Name Field
+                  // Part Number Field
                   TextField(
-                    controller: authController.nameController,
+                    controller: controller.partNumberController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.person_outline),
-                      labelText: 'Full Name',
+                      prefixIcon: Icon(Icons.tag),
+                      labelText: 'Part Number',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(16)),
                       ),
@@ -85,54 +84,26 @@ class RegisterScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 14),
-                  // Email Field
+                  // Description Field
                   TextField(
-                    controller: authController.emailController,
+                    controller: controller.descriptionController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.email_outlined),
-                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.description),
+                      labelText: 'Description',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(16)),
                       ),
                     ),
-                    keyboardType: TextInputType.emailAddress,
+                    maxLines: 2,
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 14),
-                  // Password Field
+                  // Location Field
                   TextField(
-                    controller: authController.passwordController,
+                    controller: controller.locationController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline),
-                      labelText: 'Password',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
-                    ),
-                    obscureText: true,
-                    textInputAction: TextInputAction.next,
-                  ),
-                  const SizedBox(height: 14),
-                  // Confirm Password Field
-                  TextField(
-                    controller: authController.confirmPasswordController,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline),
-                      labelText: 'Confirm Password',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
-                    ),
-                    obscureText: true,
-                    textInputAction: TextInputAction.next,
-                  ),
-                  const SizedBox(height: 14),
-                  // Company Name Field
-                  TextField(
-                    controller: authController.companyNameController,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.business_outlined),
-                      labelText: 'Company Name',
+                      prefixIcon: Icon(Icons.location_on),
+                      labelText: 'Location',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(16)),
                       ),
@@ -140,25 +111,67 @@ class RegisterScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 14),
-                  // Number of Employees Field
+                  // Quantity Field
                   TextField(
-                    controller: authController.numberOfEmployeesController,
+                    controller: controller.quantityController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.groups_outlined),
-                      labelText: 'Number of Employees',
+                      prefixIcon: Icon(Icons.inventory),
+                      labelText: 'Quantity',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(16)),
                       ),
                     ),
                     keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 14),
+                  // Batch Number Field
+                  TextField(
+                    controller: controller.batchNumberController,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.qr_code),
+                      labelText: 'Batch Number',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      ),
+                    ),
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 14),
+                  // Expiry Date Field
+                  TextField(
+                    controller: controller.expiryDateController,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.calendar_today),
+                      labelText: 'Expiry Date',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      ),
+                      suffixIcon: Icon(Icons.date_range),
+                    ),
+                    readOnly: true,
+                    onTap: () => controller.selectExpiryDate(context),
+                  ),
+                  const SizedBox(height: 14),
+                  // Updated On Field (Read-only, auto-filled)
+                  TextField(
+                    controller: controller.updatedOnController,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.update),
+                      labelText: 'Updated On',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      ),
+                    ),
+                    readOnly: true,
+                    enabled: false,
                   ),
                   const SizedBox(height: 24),
-                  // Register Button
+                  // Add Product Button
                   Obx(() => ElevatedButton(
-                        onPressed: authController.isLoading.value
+                        onPressed: controller.isLoading.value
                             ? null
-                            : authController.registerManager,
+                            : controller.addProduct,
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size.fromHeight(50),
                           backgroundColor: const Color(0xFF4A00E0),
@@ -167,36 +180,15 @@ class RegisterScreen extends StatelessWidget {
                           ),
                           textStyle: const TextStyle(fontSize: 18),
                         ),
-                        child: authController.isLoading.value
+                        child: controller.isLoading.value
                             ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text('Register',
+                            : const Text('Add Product',
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
                                   color: Colors.white,
-                                )                          
-                            ),
-                      )),
-                  const SizedBox(height: 16),
-                  // Login Link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Already have an account? "),
-                      GestureDetector(
-                        onTap: () {
-                          authController.clearTextControllers();
-                          Get.offAllNamed(AppRoutes.login);
-                        },
-                        child: const Text(
-                          "Login",
-                          style: TextStyle(
-                            color: Color(0xFF4A00E0),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                                  fontWeight: FontWeight.bold,
+                                )
+                              ),
+                      ),),
                 ],
               ),
             ),

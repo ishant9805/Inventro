@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import '../../modules/auth/controller/auth_controller.dart';
 
 class AuthService {
-  final String baseUrl = 'https://0332-117-96-145-115.ngrok-free.app/';
+  final String baseUrl = 'https://inventro-backend.vercel.app/';
 
   // Helper method to get auth headers with token
   Map<String, String> getAuthHeaders() {

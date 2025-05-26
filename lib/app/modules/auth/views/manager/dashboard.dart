@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inventro/app/routes/app_routes.dart';
 import '../../controller/auth_controller.dart';
 //import '../../../../routes/app_routes.dart';
 
@@ -125,7 +126,7 @@ class ManagerDashboard extends StatelessWidget {
                         icon: Icons.person_add_alt_1,
                         label: 'Add Employee',
                         color: Colors.deepPurple,
-                        onTap: () => Get.snackbar('Coming Soon', 'Add Employee feature coming soon!'),
+                        onTap: () => Get.offAllNamed(AppRoutes.addEmployee), // Get.offAllNamed(AppRoutes.roleSelection);Navigate to Add Employee screen
                       ),
                       const SizedBox(width: 12),
                       _SmallDashboardButton(
@@ -139,7 +140,7 @@ class ManagerDashboard extends StatelessWidget {
                         icon: Icons.add_box,
                         label: 'Add Product',
                         color: Colors.green,
-                        onTap: () => Get.snackbar('Coming Soon', 'Add Product feature coming soon!'),
+                        onTap: () => Get.offAllNamed(AppRoutes.addProduct),
                       ),
                       const SizedBox(width: 12),
                       _SmallDashboardButton(
@@ -175,7 +176,7 @@ class ManagerDashboard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.2),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
