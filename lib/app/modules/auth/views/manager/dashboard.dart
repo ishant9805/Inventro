@@ -31,35 +31,9 @@ class ManagerDashboard extends StatelessWidget {
         backgroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.blue),
-            onPressed: () => dashboardController.refreshProducts(),
-            tooltip: "Refresh Products",
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.red),
-            onPressed: () {
-              // Show confirmation dialog
-              Get.dialog(
-                AlertDialog(
-                  title: const Text('Logout'),
-                  content: const Text('Are you sure you want to logout?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Get.back(),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Get.back();
-                        // Call the logout method from AuthController
-                        authController.logout();
-                      },
-                      child: const Text('Logout'),
-                    ),
-                  ],
-                ),
-              );
-            },
+            icon: const Icon(Icons.account_circle, color: Colors.deepPurple),
+            onPressed: () => Get.toNamed('/manager-profile'),
+            tooltip: "Profile",
           ),
         ],
       ),

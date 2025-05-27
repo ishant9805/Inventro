@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:inventro/app/routes/app_routes.dart';
-import '../../controller/add_product_controller.dart';
 
 class AddProductScreen extends StatelessWidget {
   AddProductScreen({super.key});
 
-  final AddProductController controller = Get.put(AddProductController());
+  final TextEditingController partNumberController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController quantityController = TextEditingController();
+  final TextEditingController batchNumberController = TextEditingController();
+  final TextEditingController expiryDateController = TextEditingController();
+  final TextEditingController updatedOnController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -19,16 +23,11 @@ class AddProductScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Add Product', style: TextStyle(color: Colors.black87)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () {
-            Get.offAllNamed(AppRoutes.dashboard);
-          },
-          tooltip: "Back to Dashboard",
-        ),
         iconTheme: const IconThemeData(color: Colors.black87),
+        centerTitle: true,
       ),
       extendBodyBehindAppBar: true,
       body: Container(
@@ -45,7 +44,6 @@ class AddProductScreen extends StatelessWidget {
           child: SingleChildScrollView(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-              margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 color: Colors.white.withAlpha(210),
                 borderRadius: BorderRadius.circular(32),
@@ -71,124 +69,96 @@ class AddProductScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  // Part Number Field
                   TextField(
-                    controller: controller.partNumberController,
+                    controller: partNumberController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.tag),
                       labelText: 'Part Number',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      border: UnderlineInputBorder(),
                     ),
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 14),
-                  // Description Field
+                  const SizedBox(height: 18),
                   TextField(
-                    controller: controller.descriptionController,
+                    controller: descriptionController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.description),
                       labelText: 'Description',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      border: UnderlineInputBorder(),
                     ),
-                    maxLines: 2,
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 14),
-                  // Location Field
+                  const SizedBox(height: 18),
                   TextField(
-                    controller: controller.locationController,
+                    controller: locationController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.location_on),
                       labelText: 'Location',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      border: UnderlineInputBorder(),
                     ),
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 14),
-                  // Quantity Field
+                  const SizedBox(height: 18),
                   TextField(
-                    controller: controller.quantityController,
+                    controller: quantityController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.inventory),
                       labelText: 'Quantity',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      border: UnderlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 14),
-                  // Batch Number Field
+                  const SizedBox(height: 18),
                   TextField(
-                    controller: controller.batchNumberController,
+                    controller: batchNumberController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.qr_code),
                       labelText: 'Batch Number',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      border: UnderlineInputBorder(),
                     ),
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 14),
-                  // Expiry Date Field
+                  const SizedBox(height: 18),
                   TextField(
-                    controller: controller.expiryDateController,
+                    controller: expiryDateController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.calendar_today),
                       labelText: 'Expiry Date',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
-                      suffixIcon: Icon(Icons.date_range),
+                      hintText: 'DD / MM / YY',
+                      hintStyle: TextStyle(color: Colors.black38),
+                      border: UnderlineInputBorder(),
                     ),
-                    readOnly: true,
-                    onTap: () => controller.selectExpiryDate(context),
+                    keyboardType: TextInputType.datetime,
+                    textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 14),
-                  // Updated On Field (Read-only, auto-filled)
+                  const SizedBox(height: 18),
                   TextField(
-                    controller: controller.updatedOnController,
+                    controller: updatedOnController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.update),
                       labelText: 'Updated On',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      hintText: 'DD / MM / YY',
+                      hintStyle: TextStyle(color: Colors.black38),
+                      border: UnderlineInputBorder(),
                     ),
-                    readOnly: true,
-                    enabled: false,
+                    keyboardType: TextInputType.datetime,
+                    textInputAction: TextInputAction.done,
                   ),
-                  const SizedBox(height: 24),
-                  // Add Product Button
-                  Obx(() => ElevatedButton(
-                        onPressed: controller.isLoading.value
-                            ? null
-                            : controller.addProduct,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50),
-                          backgroundColor: const Color(0xFF4A00E0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          textStyle: const TextStyle(fontSize: 18),
-                        ),
-                        child: controller.isLoading.value
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text('Add Product',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                )
-                              ),
-                      ),),
+                  const SizedBox(height: 28),
+                  ElevatedButton(
+                    onPressed: () {
+                      // TODO: Implement add product logic
+                      Get.snackbar('Add Product', 'Feature coming soon!');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50),
+                      backgroundColor: const Color(0xFF4A00E0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      textStyle: const TextStyle(fontSize: 18),
+                    ),
+                    child: const Text('Add Product',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        )
+                    ),
+                  ),
                 ],
               ),
             ),
