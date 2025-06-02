@@ -29,6 +29,7 @@ class AddEmployeeScreen extends StatelessWidget {
           tooltip: "Back to Dashboard",
         ),
         iconTheme: const IconThemeData(color: Colors.black87),
+        centerTitle: true,
       ),
       extendBodyBehindAppBar: true,
       body: Container(
@@ -70,119 +71,112 @@ class AddEmployeeScreen extends StatelessWidget {
                       letterSpacing: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 8),
+                  Obx(() => Text(
+                    'Current Employees: ${controller.currentEmployeeCount.value}/10',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  )),
+                  const SizedBox(height: 18),
                   TextField(
                     controller: controller.nameController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.person_outline),
-                      labelText: 'Full Name',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      labelText: 'Employee Name',
+                      border: UnderlineInputBorder(),
                     ),
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 18),
                   TextField(
                     controller: controller.emailController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.email_outlined),
                       labelText: 'Email',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      border: UnderlineInputBorder(),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 18),
                   TextField(
-                    controller: controller.passwordController,
+                    controller: controller.pinController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline),
-                      labelText: '4-digit PIN',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      labelText: '4-Digit PIN',
+                      border: UnderlineInputBorder(),
+                      hintText: 'Enter 4-digit PIN',
                     ),
-                    obscureText: true,
                     keyboardType: TextInputType.number,
                     maxLength: 4,
+                    obscureText: true,
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 18),
                   TextField(
-                    controller: controller.confirmPasswordController,
+                    controller: controller.confirmPinController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline),
-                      labelText: 'Confirm 4-digit PIN',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      labelText: 'Confirm PIN',
+                      border: UnderlineInputBorder(),
+                      hintText: 'Confirm 4-digit PIN',
                     ),
-                    obscureText: true,
                     keyboardType: TextInputType.number,
                     maxLength: 4,
+                    obscureText: true,
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 18),
+                  // Role field (read-only, auto-filled)
                   TextField(
-                    enabled: false,
+                    controller: TextEditingController(text: controller.role),
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.badge),
                       labelText: 'Role',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      border: UnderlineInputBorder(),
                     ),
-                    controller: TextEditingController(text: 'Employee'),
+                    enabled: false,
+                    style: TextStyle(color: Colors.grey[600]),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 18),
                   TextField(
                     controller: controller.departmentController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.apartment),
                       labelText: 'Department',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      border: UnderlineInputBorder(),
                     ),
                     textInputAction: TextInputAction.next,
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 18),
                   TextField(
-                    controller: controller.managerIdController,
+                    controller: controller.phoneController,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.person),
-                      labelText: 'Manager ID',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
+                      labelText: 'Phone Number',
+                      border: UnderlineInputBorder(),
                     ),
+                    keyboardType: TextInputType.phone,
                     textInputAction: TextInputAction.done,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   Obx(() => ElevatedButton(
-                        onPressed: controller.isLoading.value
-                            ? null
-                            : controller.addEmployee,
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50),
-                          backgroundColor: const Color(0xFF4A00E0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : controller.addEmployee,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50),
+                      backgroundColor: const Color(0xFF4A00E0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      textStyle: const TextStyle(fontSize: 18),
+                    ),
+                    child: controller.isLoading.value
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('Add Employee',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            )
                           ),
-                          textStyle: const TextStyle(fontSize: 18),
-                        ),
-                        child: controller.isLoading.value
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text('Add Employee',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                )
-                              ),
-                      ),),
+                  )),
                 ],
               ),
             ),

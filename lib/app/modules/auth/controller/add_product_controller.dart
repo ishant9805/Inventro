@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 import '../../../data/services/product_service.dart';
+
 
 class AddProductController extends GetxController {
   final partNumberController = TextEditingController();
@@ -38,6 +40,14 @@ class AddProductController extends GetxController {
     if (_validateFields()) {
       isLoading.value = true;
       try {
+        // Get manager_id from AuthController
+        final authController = Get.find<AuthController>();
+        final managerId = authController.user.value?.id;
+        if (managerId == null) {
+          Get.snackbar('Error', 'Manager ID not found. Please login again.');
+          isLoading.value = false;
+          return;
+        }
         // Prepare data according to backend schema
         final productData = {
           'part_number': partNumberController.text.trim(),
@@ -46,6 +56,7 @@ class AddProductController extends GetxController {
           'quantity': int.tryParse(quantityController.text.trim()) ?? 0,
           'batch_number': batchNumberController.text.trim(),
           'expiry_date': expiryDateController.text.trim(),
+          'manager_id': managerId,
         };
 
         print('Submitting product data: $productData');

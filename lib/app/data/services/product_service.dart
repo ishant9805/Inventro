@@ -119,6 +119,7 @@ class ProductService {
         "batch_number":
             int.tryParse(productData['batch_number'].toString()) ?? 0,
         "expiry_date": _formatDateForBackend(productData['expiry_date']),
+        "manager_id": productData['manager_id'], // Add the missing manager_id field
       };
       print('[ProductService.addProduct] Transformed data for backend: ${jsonEncode(transformedData)}');
 
