@@ -213,6 +213,19 @@ class ManagerDashboard extends StatelessWidget {
                       final isLowStock = product.quantity <= 10;
                       final isExpiringSoon = product.daysUntilExpiry <= 30 && !isExpired;
                       
+                      final now = DateTime.now();
+                      final expiry = DateTime.tryParse(product.expiryDate);
+                      Color borderColor;
+                      if (expiry == null) {
+                        borderColor = Colors.grey;
+                      } else if (product.isExpired) {
+                        borderColor = Colors.red;
+                      } else if (expiry.difference(now).inDays <= 7) {
+                        borderColor = Colors.yellow[700]!;
+                      } else {
+                        borderColor = Colors.green;
+                      }
+                      
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
@@ -227,13 +240,7 @@ class ManagerDashboard extends StatelessWidget {
                           ],
                           border: Border(
                             bottom: BorderSide(
-                              color: isExpired 
-                                ? Colors.red 
-                                : isExpiringSoon 
-                                  ? Colors.orange 
-                                  : isLowStock 
-                                    ? Colors.yellow[700]! 
-                                    : Colors.green,
+                              color: borderColor,
                               width: 5.0,
                             ),
                           ),
@@ -331,32 +338,39 @@ class ManagerDashboard extends StatelessWidget {
   void _showProductDetails(BuildContext context, product, DashboardController controller) {
     Get.dialog(
       AlertDialog(
-        title: Text(product.partNumber),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Description: ${product.description}'),
-            Text('Location: ${product.location}'),
-            Text('Quantity: ${product.quantity}'),
-            Text('Batch Number: ${product.batchNumber}'),
-            Text('Expiry Date: ${product.formattedExpiryDate}'),
-            if (product.isExpired)
-              const Text(
-                'Status: EXPIRED',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              )
-            else if (product.daysUntilExpiry <= 30)
-              Text(
-                'Status: Expires in ${product.daysUntilExpiry} days',
-                style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
-              )
-            else
-              const Text(
-                'Status: Good',
-                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-              ),
-          ],
+        title: Text('Product Details'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (product.id != null) Text('ID: ${product.id}'),
+              Text('Part Number: ${product.partNumber}'),
+              Text('Description: ${product.description}'),
+              Text('Location: ${product.location}'),
+              Text('Quantity: ${product.quantity}'),
+              Text('Batch Number: ${product.batchNumber}'),
+              Text('Expiry Date: ${product.formattedExpiryDate}'),
+              if (product.createdAt != null) Text('Created At: ${product.createdAt}'),
+              if (product.updatedAt != null) Text('Updated On: ' + _formatDateTime(product.updatedAt)),
+              const SizedBox(height: 8),
+              if (product.isExpired)
+                const Text(
+                  'Status: EXPIRED',
+                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                )
+              else if (product.daysUntilExpiry <= 30)
+                Text(
+                  'Status: Expires in ${product.daysUntilExpiry} days',
+                  style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                )
+              else
+                const Text(
+                  'Status: Good',
+                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -497,5 +511,18 @@ class _StatCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// Helper to format date/time for display
+String _formatDateTime(String? dateTimeStr) {
+  if (dateTimeStr == null || dateTimeStr.isEmpty) return '-';
+  try {
+    final dt = DateTime.parse(dateTimeStr).toLocal(); // Convert to local (phone) time zone
+    final date = "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}";
+    final time = "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
+    return "$date at $time";
+  } catch (e) {
+    return dateTimeStr;
   }
 }

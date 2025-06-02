@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
 class EmployeeService {
-  final String baseUrl = 'https://inventro-backend.vercel.app/';
+  final String baseUrl = 'https://backend.tecsohub.com/';
 
   Future<void> addEmployee(Map<String, dynamic> data) async {
     final endpoint = path.join(baseUrl, 'register/employee');

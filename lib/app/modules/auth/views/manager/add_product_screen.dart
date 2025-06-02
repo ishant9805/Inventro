@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inventro/app/routes/app_routes.dart';
+import '../../controller/add_product_controller.dart';
 
 class AddProductScreen extends StatelessWidget {
   AddProductScreen({super.key});
 
-  final TextEditingController partNumberController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
-  final TextEditingController quantityController = TextEditingController();
-  final TextEditingController batchNumberController = TextEditingController();
-  final TextEditingController expiryDateController = TextEditingController();
-  final TextEditingController updatedOnController = TextEditingController();
+  final AddProductController controller = Get.put(AddProductController());
 
   @override
   Widget build(BuildContext context) {
+    // Set updatedOnController to today's date every time the widget builds
+    controller.updatedOnController.text = "01/06/2025";
+
     const List<Color> baseColors = [
       Color(0xFF4A00E0),
       Color(0xFF00C3FF),
@@ -23,9 +22,15 @@ class AddProductScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Product', style: TextStyle(color: Colors.black87)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () {
+            Get.offAllNamed(AppRoutes.dashboard);
+          },
+          tooltip: "Back to Dashboard",
+        ),
         iconTheme: const IconThemeData(color: Colors.black87),
         centerTitle: true,
       ),
@@ -68,9 +73,9 @@ class AddProductScreen extends StatelessWidget {
                       letterSpacing: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 18),
                   TextField(
-                    controller: partNumberController,
+                    controller: controller.partNumberController,
                     decoration: const InputDecoration(
                       labelText: 'Part Number',
                       border: UnderlineInputBorder(),
@@ -79,7 +84,7 @@ class AddProductScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   TextField(
-                    controller: descriptionController,
+                    controller: controller.descriptionController,
                     decoration: const InputDecoration(
                       labelText: 'Description',
                       border: UnderlineInputBorder(),
@@ -88,7 +93,7 @@ class AddProductScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   TextField(
-                    controller: locationController,
+                    controller: controller.locationController,
                     decoration: const InputDecoration(
                       labelText: 'Location',
                       border: UnderlineInputBorder(),
@@ -97,7 +102,7 @@ class AddProductScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   TextField(
-                    controller: quantityController,
+                    controller: controller.quantityController,
                     decoration: const InputDecoration(
                       labelText: 'Quantity',
                       border: UnderlineInputBorder(),
@@ -107,7 +112,7 @@ class AddProductScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   TextField(
-                    controller: batchNumberController,
+                    controller: controller.batchNumberController,
                     decoration: const InputDecoration(
                       labelText: 'Batch Number',
                       border: UnderlineInputBorder(),
@@ -115,50 +120,68 @@ class AddProductScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 18),
-                  TextField(
-                    controller: expiryDateController,
-                    decoration: const InputDecoration(
-                      labelText: 'Expiry Date',
-                      hintText: 'DD / MM / YY',
-                      hintStyle: TextStyle(color: Colors.black38),
-                      border: UnderlineInputBorder(),
+                  GestureDetector(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        controller.expiryDateController.text =
+                            "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+                      }
+                    },
+                    child: AbsorbPointer(
+                      child: TextField(
+                        controller: controller.expiryDateController,
+                        decoration: const InputDecoration(
+                          labelText: 'Expiry Date',
+                          hintText: 'DD / MM / YYYY',
+                          hintStyle: TextStyle(color: Colors.black38),
+                          border: UnderlineInputBorder(),
+                          suffixIcon: Icon(Icons.calendar_today),
+                        ),
+                        keyboardType: TextInputType.datetime,
+                        textInputAction: TextInputAction.next,
+                      ),
                     ),
-                    keyboardType: TextInputType.datetime,
-                    textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 18),
                   TextField(
-                    controller: updatedOnController,
+                    controller: controller.updatedOnController,
                     decoration: const InputDecoration(
                       labelText: 'Updated On',
-                      hintText: 'DD / MM / YY',
+                      hintText: 'DD / MM / YYYY',
                       hintStyle: TextStyle(color: Colors.black38),
                       border: UnderlineInputBorder(),
                     ),
-                    keyboardType: TextInputType.datetime,
-                    textInputAction: TextInputAction.done,
+                    readOnly: true,
+                    enabled: false,
                   ),
                   const SizedBox(height: 28),
-                  ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement add product logic
-                      Get.snackbar('Add Product', 'Feature coming soon!');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      backgroundColor: const Color(0xFF4A00E0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      textStyle: const TextStyle(fontSize: 18),
-                    ),
-                    child: const Text('Add Product',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        )
-                    ),
-                  ),
+                  Obx(() => ElevatedButton(
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : () => controller.addProduct(),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          backgroundColor: const Color(0xFF4A00E0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(fontSize: 18),
+                        ),
+                        child: controller.isLoading.value
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text('Add Product',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                )
+                              ),
+                      )),
                 ],
               ),
             ),

@@ -7,7 +7,7 @@ class UserModel {
   final String? profilePicture;
   final String? companyName;
   final int? companySize;
-  final String? id;
+  final int? id;
 
   UserModel({
     required this.name,

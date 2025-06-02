@@ -32,7 +32,7 @@ class ProductModel {
       batchNumber: json['batch_number'] ?? 0,
       expiryDate: json['expiry_date'] ?? '',
       createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
+      updatedAt: json['updated_on'],
     );
   }
 

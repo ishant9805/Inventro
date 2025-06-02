@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import '../../modules/auth/controller/auth_controller.dart';
 
 class AuthService {
-  final String baseUrl = 'https://inventro-backend.vercel.app/';
+  final String baseUrl = 'https://backend.tecsohub.com/';
 
   // Helper method to get auth headers with token
   Map<String, String> getAuthHeaders() {
@@ -68,6 +68,7 @@ class AuthService {
         email: email,
         role: 'manager', // Default or from response if available
         token: data['access_token'],
+        id: data['id'], // Assuming user_id is returned in the response
       );
     } else {
       throw Exception(jsonDecode(response.body)['detail'] ?? 'Login failed');
