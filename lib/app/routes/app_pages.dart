@@ -1,25 +1,28 @@
 import 'package:get/get.dart';
+import 'package:inventro/app/modules/auth/views/employee/employee_login_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/add_employee_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/add_product_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/dashboard.dart';
+import 'package:inventro/app/modules/auth/views/manager/employee_list_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/profile_screen.dart';
 import 'package:inventro/app/modules/auth/views/role_selection_screen.dart';
 import 'package:inventro/app/modules/auth/views/splash_screen.dart';
 import '../modules/auth/views/manager/login_screen.dart';
 import '../modules/auth/views/manager/register_screen.dart';
-// later we will import dashboard_view.dart too
 
 import 'app_routes.dart';
 
 class AppPages {
+  static const INITIAL = '/';
+
   static final pages = [
     GetPage(
       name: AppRoutes.splash,
       page: () => const SplashScreen(),
     ),
     GetPage(
-      name: AppRoutes.roleSelection, 
-      page: () => const RoleSelectionScreen()
+      name: AppRoutes.roleSelection,
+      page: () => const RoleSelectionScreen(),
     ),
     GetPage(
       name: AppRoutes.login,
@@ -30,9 +33,9 @@ class AppPages {
       page: () => RegisterScreen(),
     ),
     GetPage(
-     name: AppRoutes.dashboard,
-     page: () => ManagerDashboard(),   // will create later after login
-   ),
+      name: AppRoutes.dashboard,
+      page: () => ManagerDashboard(), // will create later after login
+    ),
     GetPage(
       name: AppRoutes.addEmployee,
       page: () => AddEmployeeScreen(),
@@ -44,6 +47,14 @@ class AppPages {
     GetPage(
       name: AppRoutes.managerProfile,
       page: () => ManagerProfileScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.employeeList,
+      page: () => EmployeeListScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.employeeLogin,
+      page: () => EmployeeLoginScreen(),
     ),
   ];
 }

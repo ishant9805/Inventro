@@ -200,6 +200,9 @@ class EmployeeService {
       final endpoint = path.join(baseUrl, 'employees/');
       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
 
+      print('[EmployeeService.getEmployees] Request URI: $uri');
+      print('[EmployeeService.getEmployees] Request Headers: \\${getAuthHeaders()}');
+
       final response = await http
           .get(uri, headers: getAuthHeaders())
           .timeout(
@@ -211,6 +214,9 @@ class EmployeeService {
             },
           );
 
+      print('[EmployeeService.getEmployees] Response Status Code: \\${response.statusCode}');
+      print('[EmployeeService.getEmployees] Response Body: \\${response.body}');
+
       if (response.statusCode == 200) {
         return _safeJsonDecodeArray(response.body, response.statusCode);
       } else {
@@ -218,7 +224,7 @@ class EmployeeService {
         throw Exception(
           errorData['message'] ??
               errorData['detail'] ??
-              'Failed to fetch employees (${response.statusCode})',
+              'Failed to fetch employees (\\${response.statusCode})',
         );
       }
     } on http.ClientException {
@@ -233,7 +239,7 @@ class EmployeeService {
       if (e.toString().contains('Exception:')) {
         rethrow;
       }
-      throw Exception('Network error: ${e.toString()}');
+      throw Exception('Network error: \\${e.toString()}');
     }
   }
 

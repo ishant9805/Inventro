@@ -74,8 +74,7 @@ class RoleSelectionScreen extends StatelessWidget {
                     textStyle: const TextStyle(fontSize: 18),
                   ),
                   onPressed: () {
-                    // TODO: Add employee login route when ready
-                    Get.snackbar("Coming Soon", "Employee login coming soon!");
+                    Get.toNamed(AppRoutes.employeeLogin);
                   },
                 ),
                 const SizedBox(height: 16),

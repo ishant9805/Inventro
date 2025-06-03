@@ -2,9 +2,10 @@ class EmployeeModel {
   final int? id;
   final String name;
   final String email;
-  final String pin;
   final String role;
   final String department;
+  final String phone;
+  final String? profilePicture;
   final int managerId;
   final String? createdAt;
   final String? updatedAt;
@@ -13,9 +14,10 @@ class EmployeeModel {
     this.id,
     required this.name,
     required this.email,
-    required this.pin,
     required this.role,
     required this.department,
+    required this.phone,
+    this.profilePicture,
     required this.managerId,
     this.createdAt,
     this.updatedAt,
@@ -27,9 +29,10 @@ class EmployeeModel {
       id: json['id'],
       name: json['name'] ?? '',
       email: json['email'] ?? '',
-      pin: json['pin'] ?? '',
       role: json['role'] ?? 'Employee',
       department: json['department'] ?? '',
+      phone: json['phone'] ?? '',
+      profilePicture: json['profile_picture'],
       managerId: json['manager_id'] ?? 0,
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
@@ -41,9 +44,10 @@ class EmployeeModel {
     return {
       'name': name,
       'email': email,
-      'pin': pin,
       'role': role,
       'department': department,
+      'phone': phone,
+      'profile_picture': profilePicture ?? '',
       'manager_id': managerId,
     };
   }
@@ -53,9 +57,10 @@ class EmployeeModel {
     int? id,
     String? name,
     String? email,
-    String? pin,
     String? role,
     String? department,
+    String? phone,
+    String? profilePicture,
     int? managerId,
     String? createdAt,
     String? updatedAt,
@@ -64,9 +69,10 @@ class EmployeeModel {
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
-      pin: pin ?? this.pin,
       role: role ?? this.role,
       department: department ?? this.department,
+      phone: phone ?? this.phone,
+      profilePicture: profilePicture ?? this.profilePicture,
       managerId: managerId ?? this.managerId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

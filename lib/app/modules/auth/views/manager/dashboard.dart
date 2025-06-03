@@ -86,21 +86,22 @@ class ManagerDashboard extends StatelessWidget {
                         icon: Icons.person_add_alt_1,
                         label: 'Add Employee',
                         color: Colors.deepPurple,
-                        onTap: () => Get.offAllNamed(AppRoutes.addEmployee),
+                        onTap: () => Get.toNamed(AppRoutes.addEmployee),
                       ),
                       const SizedBox(width: 12),
                       _SmallDashboardButton(
                         icon: Icons.people,
                         label: 'Employees',
                         color: Colors.blueAccent,
-                        onTap: () => Get.snackbar('Coming Soon', 'Employee feature coming soon!'),
+                        onTap: () => Get.toNamed(AppRoutes.employeeList),
+                        
                       ),
                       const SizedBox(width: 12),
                       _SmallDashboardButton(
                         icon: Icons.add_box,
                         label: 'Add Product',
                         color: Colors.green,
-                        onTap: () => Get.offAllNamed(AppRoutes.addProduct),
+                        onTap: () => Get.toNamed(AppRoutes.addProduct),
                       ),
                       const SizedBox(width: 12),
                       _SmallDashboardButton(

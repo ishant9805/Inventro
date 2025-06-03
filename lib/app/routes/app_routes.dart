@@ -7,4 +7,6 @@ abstract class AppRoutes {
   static const String addEmployee = '/add-employee'; // for adding employee in manager dashboard
   static const String addProduct = '/add-product'; // for adding product in manager dashboard
   static const String managerProfile = '/manager-profile'; // for manager profile screen
+  static const String employeeList = '/employee-list'; // for viewing employee list
+  static const String employeeLogin = '/employee-login'; // for employee login screen
 }

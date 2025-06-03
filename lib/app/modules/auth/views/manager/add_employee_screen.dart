@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:inventro/app/routes/app_routes.dart';
 import '../../controller/add_employee_controller.dart';
 
 class AddEmployeeScreen extends StatelessWidget {
@@ -24,7 +23,7 @@ class AddEmployeeScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () {
-            Get.offAllNamed(AppRoutes.dashboard);
+            Get.back();
           },
           tooltip: "Back to Dashboard",
         ),
