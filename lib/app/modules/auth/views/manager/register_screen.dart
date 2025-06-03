@@ -10,7 +10,6 @@ class RegisterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Lighter gradient colors for background
     const List<Color> baseColors = [
       Color(0xFF4A00E0),
       Color(0xFF00C3FF),
@@ -29,7 +28,6 @@ class RegisterScreen extends StatelessWidget {
           },
           tooltip: "Back to Role Selection",
         ),
-        // Remove the title from app bar
       ),
       extendBodyBehindAppBar: true,
       body: Container(
@@ -72,7 +70,6 @@ class RegisterScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  // Name Field
                   TextField(
                     controller: authController.nameController,
                     decoration: const InputDecoration(
@@ -85,7 +82,6 @@ class RegisterScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 14),
-                  // Email Field
                   TextField(
                     controller: authController.emailController,
                     decoration: const InputDecoration(
@@ -99,7 +95,6 @@ class RegisterScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 14),
-                  // Password Field
                   TextField(
                     controller: authController.passwordController,
                     decoration: const InputDecoration(
@@ -113,7 +108,6 @@ class RegisterScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 14),
-                  // Confirm Password Field
                   TextField(
                     controller: authController.confirmPasswordController,
                     decoration: const InputDecoration(
@@ -127,7 +121,6 @@ class RegisterScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 14),
-                  // Company Name Field
                   TextField(
                     controller: authController.companyNameController,
                     decoration: const InputDecoration(
@@ -140,7 +133,6 @@ class RegisterScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 14),
-                  // Number of Employees Field
                   TextField(
                     controller: authController.numberOfEmployeesController,
                     decoration: const InputDecoration(
@@ -154,7 +146,6 @@ class RegisterScreen extends StatelessWidget {
                     textInputAction: TextInputAction.done,
                   ),
                   const SizedBox(height: 24),
-                  // Register Button
                   Obx(() => ElevatedButton(
                         onPressed: authController.isLoading.value
                             ? null
@@ -177,7 +168,6 @@ class RegisterScreen extends StatelessWidget {
                             ),
                       )),
                   const SizedBox(height: 16),
-                  // Login Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

@@ -10,7 +10,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Lighter gradient colors for background
     const List<Color> baseColors = [
       Color(0xFF4A00E0),
       Color(0xFF00C3FF),
@@ -50,7 +49,7 @@ class LoginScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(32),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.5), // 0.3*255 ≈ 77
+                    color: Colors.black.withValues(alpha: 0.5),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -59,7 +58,6 @@ class LoginScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // App Title
                   const Text(
                     'Manager Login',
                     style: TextStyle(
@@ -70,7 +68,6 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  // Email Field
                   TextField(
                     controller: authController.emailController,
                     decoration: const InputDecoration(
@@ -83,7 +80,6 @@ class LoginScreen extends StatelessWidget {
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 18),
-                  // Password Field
                   TextField(
                     controller: authController.passwordController,
                     obscureText: true,
@@ -96,12 +92,10 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // Forgot Password Button
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        // TODO: Implement forgot password navigation
                         Get.snackbar("Forgot Password", "Password reset coming soon!");
                       },
                       child: const Text(
@@ -114,7 +108,6 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // Login Button
                   Obx(() => ElevatedButton(
                         onPressed: authController.isLoading.value
                             ? null
@@ -137,7 +130,6 @@ class LoginScreen extends StatelessWidget {
                               ),
                     ),),
                   const SizedBox(height: 18),
-                  // Register Prompt
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

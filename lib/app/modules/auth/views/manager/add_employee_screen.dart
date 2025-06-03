@@ -125,7 +125,6 @@ class AddEmployeeScreen extends StatelessWidget {
                     textInputAction: TextInputAction.next,
                   ),
                   const SizedBox(height: 18),
-                  // Role field (read-only, auto-filled)
                   TextField(
                     controller: TextEditingController(text: controller.role),
                     decoration: const InputDecoration(

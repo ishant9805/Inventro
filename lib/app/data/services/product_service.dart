@@ -11,7 +11,6 @@ class ProductService {
   Map<String, String> getAuthHeaders() {
     final authController = Get.find<AuthController>();
     final tokenValue = authController.user.value?.token;
-    print('[ProductService] Raw Token: ${tokenValue ?? 'NULL'}');
 
     if (tokenValue == null || tokenValue.isEmpty) {
       throw Exception('No authentication token found. Please login again.');
@@ -29,7 +28,6 @@ class ProductService {
       'accept': 'application/json',
       'Authorization': 'Bearer $token',
     };
-    print('[ProductService] Headers: $headers');
     return headers;
   }
 
@@ -104,11 +102,9 @@ class ProductService {
   Future<Map<String, dynamic>> addProduct(
     Map<String, dynamic> productData,
   ) async {
-    print('[ProductService.addProduct] Received productData: $productData');
     try {
       final endpoint = path.join(baseUrl, 'products/'); // Ensure trailing slash
       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
-      print('[ProductService.addProduct] Request URI: $uri');
 
       // Transform data to match backend schema
       final transformedData = {
@@ -121,14 +117,12 @@ class ProductService {
         "expiry_date": _formatDateForBackend(productData['expiry_date']),
         "manager_id": productData['manager_id'], // Add the missing manager_id field
       };
-      print('[ProductService.addProduct] Transformed data for backend: ${jsonEncode(transformedData)}');
 
       final authHeaders = getAuthHeaders();
       final requestHeaders = {
         ...authHeaders,
         'Content-Type': 'application/json',
       };
-      print('[ProductService.addProduct] Sending POST request to $uri with headers: $requestHeaders');
 
       final response = await http
           .post(
@@ -139,15 +133,11 @@ class ProductService {
           .timeout(
             const Duration(seconds: 30),
             onTimeout: () {
-              print('[ProductService.addProduct] Request timed out.');
               throw Exception(
                 'Request timeout - please check your internet connection',
               );
             },
           );
-
-      print('[ProductService.addProduct] Response Status Code: ${response.statusCode}');
-      print('[ProductService.addProduct] Response Body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = _safeJsonDecode(
@@ -155,14 +145,11 @@ class ProductService {
           response.statusCode,
         );
         if (responseData['error'] == true) {
-          print('[ProductService.addProduct] Error from _safeJsonDecode: ${responseData['message']}');
           throw Exception(responseData['message'] ?? 'Failed to add product');
         }
-        print('[ProductService.addProduct] Product added successfully: $responseData');
         return responseData;
       } else {
         final errorData = _safeJsonDecode(response.body, response.statusCode);
-        print('[ProductService.addProduct] Error adding product. Status: ${response.statusCode}, ErrorData: $errorData');
         throw Exception(
           errorData['message'] ??
               errorData['detail'] ??
@@ -170,17 +157,14 @@ class ProductService {
         );
       }
     } on http.ClientException catch (e) {
-      print('[ProductService.addProduct] ClientException: ${e.toString()}');
       throw Exception(
         'Network connection error. Please check your internet connection.',
       );
     } on FormatException catch (e) {
-      print('[ProductService.addProduct] FormatException: ${e.toString()}');
       throw Exception(
         'Invalid server response format. Please try again later.',
       );
     } catch (e) {
-      print('[ProductService.addProduct] Generic Exception: ${e.toString()}');
       if (e.toString().contains('Exception:')) {
         rethrow;
       }
@@ -194,7 +178,6 @@ class ProductService {
       final endpoint = path.join(baseUrl, 'products/'); // Ensure trailing slash
       final authController = Get.find<AuthController>();
       final tokenValue = authController.user.value?.token;
-      print('[ProductService] Raw Token: ${tokenValue ?? 'NULL'}');
 
       if (tokenValue == null || tokenValue.isEmpty) {
         throw Exception('No authentication token found. Please login again.');
@@ -202,7 +185,7 @@ class ProductService {
 
       final token = tokenValue.trim(); // Trim whitespace
       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
-      print('[ProductService] GET $uri');
+
       final response = await http
           .get(
             uri,
@@ -219,8 +202,6 @@ class ProductService {
               );
             },
           );
-      print('[ProductService] Response status: ${response.statusCode}');
-      print('[ProductService] Response body: ${response.body}');
       if (response.statusCode == 200) {
         return _safeJsonDecodeArray(response.body, response.statusCode);
       } else {
@@ -317,15 +298,11 @@ class ProductService {
         "expiry_date": _formatDateForBackend(productData['expiry_date']),
       };
       
-      print('[ProductService.updateProduct] Transformed data for backend: ${jsonEncode(transformedData)}');
-      print('[ProductService.updateProduct] Request URI: $uri');
-
       final authHeaders = getAuthHeaders();
       final requestHeaders = {
         ...authHeaders,
         'Content-Type': 'application/json',
       };
-      print('[ProductService.updateProduct] Sending PUT request to $uri with headers: $requestHeaders');
 
       final response = await http
           .put(

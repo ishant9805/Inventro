@@ -5,7 +5,6 @@ import 'package:inventro/app/routes/app_pages.dart';
 import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 
 void main() {
-  // Register your AuthController globally
   Get.put(AuthController());
   runApp(const MyApp());
 }

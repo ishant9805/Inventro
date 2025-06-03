@@ -76,10 +76,9 @@ class AuthService {
   }
 
   // FETCH USER PROFILE
-  Future<UserModel> fetchUserProfile(String token) async {
+  Future<UserModel> fetchUserProfile(String token, {String? fallbackRole}) async {
     final endpoint = path.join(baseUrl, 'user/profile');
     final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
-    
     final response = await http.get(
       uri,
       headers: {
@@ -87,14 +86,13 @@ class AuthService {
         'Authorization': 'Bearer $token'
       },
     );
-    
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      // Create a full user model with both token and profile data
+      // Use fallbackRole if role is missing
       return UserModel.fromJson({
         ...data,
-        'token': token, // Ensure the token is included
-      });
+        'token': token,
+      }, fallbackRole: fallbackRole);
     } else {
       throw Exception('Failed to load user profile');
     }

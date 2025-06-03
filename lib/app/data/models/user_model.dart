@@ -21,12 +21,12 @@ class UserModel {
     this.id,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
+  factory UserModel.fromJson(Map<String, dynamic> json, {String? fallbackRole}) {
     return UserModel(
       id: json['id'],
       name: json['name'] ?? 'User',
       email: json['email'] ?? '',
-      role: json['role'] ?? 'manager',
+      role: json['role'] ?? fallbackRole ?? 'manager',
       token: json['token'] ?? json['access_token'] ?? '',
       phone: json['phone'],
       profilePicture: json['profile_picture'],

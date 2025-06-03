@@ -3,10 +3,11 @@ abstract class AppRoutes {
   static const String roleSelection = '/role-selection';
   static const String login = '/login';
   static const String register = '/register';
-  static const String dashboard = '/dashboard'; // we will make this after login
-  static const String addEmployee = '/add-employee'; // for adding employee in manager dashboard
-  static const String addProduct = '/add-product'; // for adding product in manager dashboard
-  static const String managerProfile = '/manager-profile'; // for manager profile screen
-  static const String employeeList = '/employee-list'; // for viewing employee list
-  static const String employeeLogin = '/employee-login'; // for employee login screen
+  static const String dashboard = '/dashboard';
+  static const String addEmployee = '/add-employee';
+  static const String addProduct = '/add-product';
+  static const String managerProfile = '/manager-profile';
+  static const String employeeList = '/employee-list';
+  static const String employeeLogin = '/employee-login';
+  static const String employeeDashboard = '/employee-dashboard';
 }

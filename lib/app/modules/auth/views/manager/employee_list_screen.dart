@@ -69,7 +69,6 @@ class EmployeeListScreen extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                // Employee count header
                 Obx(() => Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -99,7 +98,6 @@ class EmployeeListScreen extends StatelessWidget {
                   ),
                 )),
                 const SizedBox(height: 20),
-                // Employee list
                 Expanded(
                   child: Obx(() {
                     if (controller.isLoading.value) {

@@ -1,8 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 import '../../../data/services/auth_service.dart';
-import '../../../data/models/user_model.dart';
-import '../../../routes/app_routes.dart';
 
 class EmployeeLoginController extends GetxController {
   final emailController = TextEditingController();
@@ -22,12 +21,21 @@ class EmployeeLoginController extends GetxController {
 
     try {
       isLoading.value = true;
-      final user = await _authService.login(email, pin);
-      // Optionally check user.role == 'employee' if backend provides role
-      Get.snackbar('Success', 'Login successful!');
-      // Save user info in state if needed
-      // Navigate to employee dashboard (create this screen if not exists)
-      // Example: Get.offAllNamed(AppRoutes.employeeDashboard);
+      // Step 1: Call login API to get token
+      final tokenResult = await _authService.login(email, pin);
+      // Step 2: Use the token to fetch complete user profile
+      final userProfile = await _authService.fetchUserProfile(tokenResult.token, fallbackRole: 'employee');
+      // Step 3: Check if role is employee
+      if (userProfile.role.toLowerCase() == 'employee') {
+        // Save user info in AuthController for token access
+        final authController = Get.find<AuthController>();
+        authController.user.value = userProfile;
+        // Navigate to employee dashboard
+        Get.snackbar('Success', 'Login successful!');
+        Get.offAllNamed('/employee-dashboard');
+      } else {
+        Get.snackbar('Login Failed', 'You are not registered as an employee.');
+      }
     } catch (e) {
       Get.snackbar('Login Failed', e.toString());
     } finally {

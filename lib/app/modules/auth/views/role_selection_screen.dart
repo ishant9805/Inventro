@@ -13,7 +13,7 @@ class RoleSelectionScreen extends StatelessWidget {
       Color(0xFF00C3FF), // Cyan
       Color(0xFF8F00FF), // Purple
     ];
-    final List<Color> lightColors = baseColors.map((c) => c.withValues(alpha: 0.8)).toList();
+    final List<Color> lightColors = baseColors.map((c) => c.withAlpha(170)).toList();
 
     return Scaffold(
       body: Container(

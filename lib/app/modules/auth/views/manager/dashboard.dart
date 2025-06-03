@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:inventro/app/routes/app_routes.dart';
 import '../../controller/auth_controller.dart';
 import '../../controller/dashboard_controller.dart';
-//import '../../../../routes/app_routes.dart';
 
 class ManagerDashboard extends StatelessWidget {
   const ManagerDashboard({super.key});

@@ -10,7 +10,6 @@ class AddProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Set updatedOnController to today's date every time the widget builds
     controller.updatedOnController.text = "01/06/2025";
 
     const List<Color> baseColors = [
