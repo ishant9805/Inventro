@@ -193,8 +193,7 @@ class AddEmployeeController extends GetxController {
 
         _clearFields();
         currentEmployeeCount.value = newEmployeeCount;
-
-        print('Employee added successfully: $result');
+        Get.offAllNamed('/dashboard');
       } catch (e) {
         print('Error adding employee: $e');
         Get.snackbar(

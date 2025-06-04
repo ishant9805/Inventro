@@ -157,13 +157,21 @@ class ManagerDashboard extends StatelessWidget {
                       'Inventory List',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                     ),
-                    Obx(() => dashboardController.isLoading.value 
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const SizedBox.shrink(),
+                    Row(
+                      children: [
+                        Obx(() => dashboardController.isLoading.value 
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.refresh, color: Colors.deepPurple),
+                              tooltip: 'Refresh Inventories',
+                              onPressed: dashboardController.refreshProducts,
+                            ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

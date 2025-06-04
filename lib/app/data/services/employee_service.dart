@@ -197,7 +197,7 @@ class EmployeeService {
   // GET ALL EMPLOYEES FOR MANAGER
   Future<List<Map<String, dynamic>>> getEmployees() async {
     try {
-      final endpoint = path.join(baseUrl, 'employees');
+      final endpoint = path.join(baseUrl, 'manager/employees');
       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
 
       print('[EmployeeService.getEmployees] Request URI: $uri');

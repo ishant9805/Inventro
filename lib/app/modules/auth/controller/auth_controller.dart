@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/models/user_model.dart';
 import '../../../routes/app_routes.dart';
@@ -75,6 +76,7 @@ class AuthController extends GetxController {
       
       // Step 3: Set the complete user profile in state
       user.value = userProfile;
+      await saveUserToPrefs(userProfile);
 
       Get.snackbar("Success", "Login successful!");
 
@@ -96,6 +98,7 @@ class AuthController extends GetxController {
   void logout() {
     // Clear user data
     user.value = null;
+    clearUserPrefs();
     clearTextControllers();
     
     // Show success message
@@ -118,6 +121,59 @@ class AuthController extends GetxController {
     confirmPasswordController.clear();
     companyNameController.clear();
     numberOfEmployeesController.clear();
+  }
+
+  // --- Persistent Login: Save user to SharedPreferences ---
+  Future<void> saveUserToPrefs(UserModel user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_name', user.name);
+    await prefs.setString('user_email', user.email);
+    await prefs.setString('user_role', user.role);
+    await prefs.setString('user_token', user.token);
+    if (user.phone != null) await prefs.setString('user_phone', user.phone!);
+    if (user.profilePicture != null) await prefs.setString('user_profile_picture', user.profilePicture!);
+    if (user.companyName != null) await prefs.setString('user_company_name', user.companyName!);
+    if (user.companySize != null) await prefs.setInt('user_company_size', user.companySize!);
+    if (user.id != null) await prefs.setInt('user_id', user.id!);
+  }
+
+  // --- Persistent Login: Load user from SharedPreferences ---
+  Future<void> loadUserFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('user_token');
+    if (token != null && token.isNotEmpty) {
+      user.value = UserModel(
+        name: prefs.getString('user_name') ?? '',
+        email: prefs.getString('user_email') ?? '',
+        role: prefs.getString('user_role') ?? 'manager',
+        token: token,
+        phone: prefs.getString('user_phone'),
+        profilePicture: prefs.getString('user_profile_picture'),
+        companyName: prefs.getString('user_company_name'),
+        companySize: prefs.getInt('user_company_size'),
+        id: prefs.getInt('user_id'),
+      );
+    }
+  }
+
+  // --- Persistent Login: Clear user from SharedPreferences ---
+  Future<void> clearUserPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_name');
+    await prefs.remove('user_email');
+    await prefs.remove('user_role');
+    await prefs.remove('user_token');
+    await prefs.remove('user_phone');
+    await prefs.remove('user_profile_picture');
+    await prefs.remove('user_company_name');
+    await prefs.remove('user_company_size');
+    await prefs.remove('user_id');
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadUserFromPrefs();
   }
 
   @override

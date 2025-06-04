@@ -73,6 +73,7 @@ class AddProductController extends GetxController {
         );
         
         _clearFields();
+        Get.offAllNamed('/dashboard');
         
         print('Product added successfully: $result');
         
