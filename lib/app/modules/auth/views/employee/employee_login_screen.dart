@@ -43,6 +43,7 @@ class EmployeeLoginScreen extends StatelessWidget {
         child: Center(
           child: SingleChildScrollView(
             child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
               decoration: BoxDecoration(
                 color: Colors.white.withAlpha(210),

@@ -10,13 +10,6 @@ class RegisterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const List<Color> baseColors = [
-      Color(0xFF4A00E0),
-      Color(0xFF00C3FF),
-      Color(0xFF8F00FF),
-    ];
-    final List<Color> lightColors = baseColors.map((c) => c.withValues(alpha: 170)).toList();
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -33,13 +26,7 @@ class RegisterScreen extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: lightColors,
-          ),
-        ),
+        color: Colors.white,
         child: Center(
           child: SingleChildScrollView(
             child: Container(

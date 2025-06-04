@@ -47,6 +47,7 @@ class AddProductScreen extends StatelessWidget {
         child: Center(
           child: SingleChildScrollView(
             child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
               decoration: BoxDecoration(
                 color: Colors.white.withAlpha(210),

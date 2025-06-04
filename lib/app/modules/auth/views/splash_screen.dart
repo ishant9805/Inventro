@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 import 'package:inventro/app/routes/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,8 +14,14 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
-      Get.offAllNamed(AppRoutes.roleSelection);
+    Future.delayed(const Duration(seconds: 2), () async {
+      final authController = Get.find<AuthController>();
+      await authController.loadUserFromPrefs();
+      if (authController.user.value != null) {
+        Get.offAllNamed(AppRoutes.dashboard);
+      } else {
+        Get.offAllNamed(AppRoutes.roleSelection);
+      }
     });
   }
 

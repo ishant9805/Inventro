@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:inventro/app/routes/app_routes.dart';
 import '../../controller/auth_controller.dart';
 import '../../controller/dashboard_controller.dart';
+//import '../../../../routes/app_routes.dart';
 
 class ManagerDashboard extends StatelessWidget {
   const ManagerDashboard({super.key});
@@ -157,21 +158,13 @@ class ManagerDashboard extends StatelessWidget {
                       'Inventory List',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                     ),
-                    Row(
-                      children: [
-                        Obx(() => dashboardController.isLoading.value 
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : IconButton(
-                              icon: const Icon(Icons.refresh, color: Colors.deepPurple),
-                              tooltip: 'Refresh Inventories',
-                              onPressed: dashboardController.refreshProducts,
-                            ),
-                        ),
-                      ],
+                    Obx(() => dashboardController.isLoading.value 
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const SizedBox.shrink(),
                     ),
                   ],
                 ),
