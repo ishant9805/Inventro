@@ -10,4 +10,9 @@ abstract class AppRoutes {
   static const String employeeList = '/employee-list';
   static const String employeeLogin = '/employee-login';
   static const String employeeDashboard = '/employee-dashboard';
+  static const String managerCompanyChoice = '/manager-company-choice';
+  static const String managerCompanyId = '/manager-company-id';
+  static const String managerAddCompany = '/manager-add-company';
+  static const String companyCreation = '/companyCreation';
+  static const String registerManager = '/registerManager';
 }

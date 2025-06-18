@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:inventro/app/routes/app_routes.dart';
 import 'package:inventro/app/routes/app_pages.dart';
 import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
-
 void main() {
   Get.put(AuthController());
   runApp(const MyApp());

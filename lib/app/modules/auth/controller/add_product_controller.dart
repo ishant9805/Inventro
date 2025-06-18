@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
+import 'package:inventro/app/modules/auth/controller/dashboard_controller.dart';
 import '../../../data/services/product_service.dart';
 
 
@@ -74,7 +75,11 @@ class AddProductController extends GetxController {
         
         _clearFields();
         Get.offAllNamed('/dashboard');
-        
+        // Ensure dashboard product list is refreshed after adding
+        final dashboardController = Get.isRegistered<DashboardController>()
+            ? Get.find<DashboardController>()
+            : null;
+        dashboardController?.refreshProducts();
         print('Product added successfully: $result');
         
       } catch (e) {

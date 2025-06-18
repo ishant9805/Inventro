@@ -1,11 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inventro/app/data/services/company_service.dart';
 import '../../controller/auth_controller.dart';
 
 class ManagerProfileScreen extends StatelessWidget {
   ManagerProfileScreen({super.key});
 
   final AuthController authController = Get.find<AuthController>();
+  final CompanyService _companyService = CompanyService();
+
+  Future<Widget> _buildCompanyInfo(int? companyId) async {
+    if (companyId == null || companyId == 0) {
+      return const Text('Company information not available.', style: TextStyle(fontSize: 16, color: Colors.red));
+    }
+    final company = await _companyService.getCompanyById(companyId.toString());
+    if (company == null) {
+      return const Text('Company information not available.', style: TextStyle(fontSize: 16, color: Colors.red));
+    }
+    return Column(
+      children: [
+        Text('Company ID: ${company['id']}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        Text('Company Name: ${company['name']}', style: const TextStyle(fontSize: 16)),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,16 +57,28 @@ class ManagerProfileScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 8),
-            if (user?.companyName != null)
-              Text(
-                'Company: ${user!.companyName}',
-                style: const TextStyle(fontSize: 16),
-              ),
-            if (user?.companySize != null)
-              Text(
-                'Company Size: ${user!.companySize}',
-                style: const TextStyle(fontSize: 16),
-              ),
+            FutureBuilder<Widget>(
+              future: user?.company != null
+                  ? Future.value(Column(
+                      children: [
+                        Text('Company ID: ${user!.company!.id}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text('Company Name: ${user.company!.name}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ],
+                    ))
+                  : Future.value(const Text('Company information not available.', style: TextStyle(fontSize: 16, color: Colors.red))),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return const Text('Error loading company info.', style: TextStyle(color: Colors.red));
+                }
+                return snapshot.data ?? const SizedBox();
+              },
+            ),
             const SizedBox(height: 24),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),

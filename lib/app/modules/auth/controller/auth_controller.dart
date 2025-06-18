@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inventro/app/modules/auth/views/manager/company_details_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../../../data/services/auth_service.dart';
 import '../../../data/models/user_model.dart';
 import '../../../routes/app_routes.dart';
-
+import '../../../data/services/company_service.dart';
+import '../../../data/services/employee_service.dart';
 class AuthController extends GetxController {
   // Input fields for login and registration
   final nameController = TextEditingController();
@@ -21,7 +24,7 @@ class AuthController extends GetxController {
   final AuthService _authService = AuthService();
 
   // --- REGISTER MANAGER ---
-  Future<void> registerManager() async {
+  Future<void> registerManager({String? companyId}) async {
     if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
       Get.snackbar("Error", "Passwords do not match");
       return;
@@ -34,8 +37,7 @@ class AuthController extends GetxController {
         "email": emailController.text.trim(),
         "password": passwordController.text.trim(),
         "name": nameController.text.trim(),
-        "company_name": companyNameController.text.trim(),
-        "company_size": int.tryParse(numberOfEmployeesController.text.trim()) ?? 0,
+        if (companyId != null) "company_id": companyId,
         "phone": "string",
         "profile_picture": "string",
       };
@@ -43,11 +45,27 @@ class AuthController extends GetxController {
       await _authService.registerAdmin(body);
       Get.snackbar("Success", "Manager registered successfully");
 
-      clearTextControllers();
+      // Fetch company details and employee count if registering with existing company
+      if (companyId != null) {
+        final companyService = CompanyService();
+        final companyData = await companyService.getCompanyById(companyId);
+        int employeeCount = 0;
+        if (companyData != null) {
+          try {
+            // Only fetch employees if company exists and manager is registered
+            // (Assume backend links manager to company on registration)
+            // You may want to fetch employees by companyId if your API supports it
+          } catch (_) {}
+        }
+        // Redirect to login after registration
+        clearTextControllers();
+        Get.offAllNamed(AppRoutes.login);
+        return;
+      }
 
+      clearTextControllers();
       // Navigate to Login page
       Get.offAllNamed(AppRoutes.login);
-
     } catch (e) {
       Get.snackbar("Error", e.toString());
     } finally {
@@ -135,6 +153,13 @@ class AuthController extends GetxController {
     if (user.companyName != null) await prefs.setString('user_company_name', user.companyName!);
     if (user.companySize != null) await prefs.setInt('user_company_size', user.companySize!);
     if (user.id != null) await prefs.setInt('user_id', user.id!);
+    if (user.company != null) await prefs.setString('user_company', jsonEncode({
+      'id': user.company!.id,
+      'name': user.company!.name,
+      'size': user.company!.size,
+      'created_at': user.company!.createdAt,
+      'updated_at': user.company!.updatedAt,
+    }));
   }
 
   // --- Persistent Login: Load user from SharedPreferences ---
@@ -142,6 +167,11 @@ class AuthController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('user_token');
     if (token != null && token.isNotEmpty) {
+      CompanyModel? company;
+      final companyJson = prefs.getString('user_company');
+      if (companyJson != null) {
+        company = CompanyModel.fromJson(jsonDecode(companyJson));
+      }
       user.value = UserModel(
         name: prefs.getString('user_name') ?? '',
         email: prefs.getString('user_email') ?? '',
@@ -152,6 +182,7 @@ class AuthController extends GetxController {
         companyName: prefs.getString('user_company_name'),
         companySize: prefs.getInt('user_company_size'),
         id: prefs.getInt('user_id'),
+        company: company,
       );
     }
   }

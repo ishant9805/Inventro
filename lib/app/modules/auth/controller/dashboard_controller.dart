@@ -33,7 +33,7 @@ class DashboardController extends GetxController {
         'Error', 
         'Failed to load products: ${e.toString().replaceAll('Exception: ', '')}',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
+        backgroundColor: Colors.red.withAlpha(25),
         colorText: Colors.red[800],
         duration: const Duration(seconds: 3),
       );

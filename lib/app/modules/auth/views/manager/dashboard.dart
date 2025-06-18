@@ -75,49 +75,42 @@ class ManagerDashboard extends StatelessWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 16),
-                
-                // Center-aligned row of equally sized buttons
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _SmallDashboardButton(
-                        icon: Icons.person_add_alt_1,
-                        label: 'Add Employee',
-                        color: Colors.deepPurple,
-                        onTap: () => Get.toNamed(AppRoutes.addEmployee),
-                      ),
-                      const SizedBox(width: 12),
-                      _SmallDashboardButton(
-                        icon: Icons.people,
-                        label: 'Employees',
-                        color: Colors.blueAccent,
-                        onTap: () => Get.toNamed(AppRoutes.employeeList),
-                        
-                      ),
-                      const SizedBox(width: 12),
-                      _SmallDashboardButton(
-                        icon: Icons.add_box,
-                        label: 'Add Product',
-                        color: Colors.green,
-                        onTap: () => Get.toNamed(AppRoutes.addProduct),
-                      ),
-                      const SizedBox(width: 12),
-                      _SmallDashboardButton(
-                        icon: Icons.assignment,
-                        label: 'Assign Task',
-                        color: Colors.orange,
-                        onTap: () => Get.snackbar('Coming Soon', 'Assign Task feature coming soon!'),
-                      ),
-                    ],
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _SmallDashboardButton(
+                      icon: Icons.person_add_alt_1,
+                      label: 'Add Employee',
+                      color: Colors.deepPurple,
+                      onTap: () => Get.toNamed(AppRoutes.addEmployee),
+                    ),
+                    const SizedBox(width: 16),
+                    _SmallDashboardButton(
+                      icon: Icons.people,
+                      label: 'Employees',
+                      color: Colors.blueAccent,
+                      onTap: () => Get.toNamed(AppRoutes.employeeList),
+                    ),
+                    const SizedBox(width: 16),
+                    _SmallDashboardButton(
+                      icon: Icons.add_box,
+                      label: 'Add Product',
+                      color: Colors.green,
+                      onTap: () => Get.toNamed(AppRoutes.addProduct),
+                    ),
+                    const SizedBox(width: 16),
+                    _SmallDashboardButton(
+                      icon: Icons.assignment,
+                      label: 'Assign Task',
+                      color: Colors.orange,
+                      onTap: () => Get.snackbar('Coming Soon', 'Assign Task feature coming soon!'),
+                    ),
+                  ],
                 ),
-                
                 const SizedBox(height: 24),
-                
                 // Product Statistics Cards
-                Obx(() => Row(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
                       child: _StatCard(
@@ -146,7 +139,7 @@ class ManagerDashboard extends StatelessWidget {
                       ),
                     ),
                   ],
-                )),
+                ),
                 
                 const SizedBox(height: 24),
                 
@@ -165,6 +158,22 @@ class ManagerDashboard extends StatelessWidget {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const SizedBox.shrink(),
+                    ),
+                    Row(
+                      children: [
+                        Obx(() => dashboardController.isLoading.value 
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.refresh, color: Colors.deepPurple),
+                              tooltip: 'Refresh Inventories',
+                              onPressed: dashboardController.refreshProducts,
+                            ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -426,35 +435,37 @@ class _SmallDashboardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: SizedBox(
-          width: 78,
-          height: 78,
+    return SizedBox(
+      width: 90,
+      height: 90,
+      child: Card(
+        margin: EdgeInsets.zero,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 24, color: color),
-                const SizedBox(height: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 11,
+                Icon(icon, size: 28, color: color),
+                const SizedBox(height: 8),
+                FittedBox(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -487,26 +498,35 @@ class _StatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(icon, size: 32, color: color),
+            FittedBox(
+              child: Icon(icon, size: 32, color: color),
+            ),
             const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: color,
+            FittedBox(
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
+            FittedBox(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),

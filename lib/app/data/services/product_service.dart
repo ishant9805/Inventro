@@ -103,7 +103,7 @@ class ProductService {
     Map<String, dynamic> productData,
   ) async {
     try {
-      final endpoint = path.join(baseUrl, 'products/'); // Ensure trailing slash
+      final endpoint = path.join(baseUrl, 'manager/inventory/'); // Ensure trailing slash
       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
 
       // Transform data to match backend schema
@@ -175,7 +175,7 @@ class ProductService {
   // GET ALL PRODUCTS
   Future<List<Map<String, dynamic>>> getProducts() async {
     try {
-      final endpoint = path.join(baseUrl, 'products/'); // Ensure trailing slash
+      final endpoint = path.join(baseUrl, 'manager/inventory/'); // Ensure trailing slash
       final authController = Get.find<AuthController>();
       final tokenValue = authController.user.value?.token;
 

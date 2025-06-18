@@ -1,3 +1,29 @@
+class CompanyModel {
+  final int id;
+  final String name;
+  final int size;
+  final String? createdAt;
+  final String? updatedAt;
+
+  CompanyModel({
+    required this.id,
+    required this.name,
+    required this.size,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory CompanyModel.fromJson(Map<String, dynamic> json) {
+    return CompanyModel(
+      id: json['id'],
+      name: json['name'] ?? '',
+      size: json['size'] ?? 0,
+      createdAt: json['created_at'],
+      updatedAt: json['updated_at'],
+    );
+  }
+}
+
 class UserModel {
   final String name;
   final String email;
@@ -8,6 +34,8 @@ class UserModel {
   final String? companyName;
   final int? companySize;
   final int? id;
+  final int? companyId;
+  final CompanyModel? company;
 
   UserModel({
     required this.name,
@@ -19,6 +47,8 @@ class UserModel {
     this.companyName,
     this.companySize,
     this.id,
+    this.companyId,
+    this.company,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json, {String? fallbackRole}) {
@@ -32,6 +62,8 @@ class UserModel {
       profilePicture: json['profile_picture'],
       companyName: json['company_name'],
       companySize: json['company_size'],
+      companyId: json['company_id'],
+      company: json['company'] != null ? CompanyModel.fromJson(json['company']) : null,
     );
   }
 }

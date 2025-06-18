@@ -9,6 +9,7 @@ import 'package:inventro/app/modules/auth/views/role_selection_screen.dart';
 import 'package:inventro/app/modules/auth/views/splash_screen.dart';
 import '../modules/auth/views/manager/login_screen.dart';
 import '../modules/auth/views/manager/register_screen.dart';
+import '../modules/auth/views/manager/company_creation_page.dart';
 
 import 'app_routes.dart';
 
@@ -55,6 +56,14 @@ class AppPages {
     GetPage(
       name: AppRoutes.employeeLogin,
       page: () => EmployeeLoginScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.companyCreation,
+      page: () => CompanyCreationPage(),
+    ),
+    GetPage(
+      name: AppRoutes.registerManager,
+      page: () => RegisterScreen(),
     ),
   ];
 }

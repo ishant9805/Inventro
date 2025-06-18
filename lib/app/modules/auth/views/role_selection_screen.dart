@@ -13,7 +13,7 @@ class RoleSelectionScreen extends StatelessWidget {
       Color(0xFF00C3FF), // Cyan
       Color(0xFF8F00FF), // Purple
     ];
-    final List<Color> lightColors = baseColors.map((c) => c.withAlpha(170)).toList();
+    final List<Color> lightColors = baseColors.map((c) => c.withValues(alpha: 0.8)).toList();
 
     return Scaffold(
       body: Container(
@@ -79,8 +79,29 @@ class RoleSelectionScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () {
-                    Get.toNamed(AppRoutes.register);
+                  onPressed: () async {
+                    final result = await showDialog<String>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Register as Manager'),
+                        content: const Text('Choose your registration type:'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop('new'),
+                            child: const Text('Create a New Company'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop('existing'),
+                            child: const Text('Join an Existing Company'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (result == 'new') {
+                      Get.toNamed(AppRoutes.companyCreation);
+                    } else if (result == 'existing') {
+                      Get.toNamed(AppRoutes.register, arguments: {'companyId': ''});
+                    }
                   },
                   child: const Text(
                     "Register as Manager",
