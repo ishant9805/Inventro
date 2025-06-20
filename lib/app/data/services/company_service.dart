@@ -23,12 +23,6 @@ class CompanyService {
       final token = storage.read('token');
       
       print('[CompanyService.getCompanyById] token exists: ${token != null}');
-      
-      if (token == null || token.isEmpty) {
-        print('[CompanyService.getCompanyById] No token found, redirecting to register');
-        return null;
-      }
-      
       // Prepare headers
       final headers = {
         'accept': 'application/json',

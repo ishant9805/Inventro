@@ -79,30 +79,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () async {
-                    final result = await showDialog<String>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Register as Manager'),
-                        content: const Text('Choose your registration type:'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop('new'),
-                            child: const Text('Create a New Company'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop('existing'),
-                            child: const Text('Join an Existing Company'),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (result == 'new') {
-                      Get.toNamed(AppRoutes.companyCreation);
-                    } else if (result == 'existing') {
-                      Get.toNamed(AppRoutes.register, arguments: {'companyId': ''});
-                    }
-                  },
+                  onPressed: () => _showManagerRegistrationDialog(context),
                   child: const Text(
                     "Register as Manager",
                     style: TextStyle(fontSize: 16, color: Colors.black54),
@@ -111,6 +88,112 @@ class RoleSelectionScreen extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Show dialog for manager registration company selection
+  Future<void> _showManagerRegistrationDialog(BuildContext context) async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Title
+            const Text(
+              'Register as Manager',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            const Text(
+              'Choose how you want to register your company',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            
+            // Add New Company Button
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Get.toNamed(AppRoutes.createCompanyScreen);
+                },
+                icon: const Icon(Icons.add_business, color: Colors.white),
+                label: const Text(
+                  'Add New Company',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4A00E0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 4,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // Join Existing Company Button
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Get.toNamed(AppRoutes.managerRegistration);
+                },
+                icon: const Icon(Icons.business, color: Color(0xFF4A00E0)),
+                label: const Text(
+                  'Join Existing Company',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF4A00E0),
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF4A00E0), width: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
         ),
       ),
     );

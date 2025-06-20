@@ -68,7 +68,7 @@ class AddProductController extends GetxController {
           'Success', 
           'Product "${partNumberController.text.trim()}" added successfully',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withOpacity(0.1),
+          backgroundColor: Colors.green.withValues(alpha: 0.1),
           colorText: Colors.green[800],
           duration: const Duration(seconds: 3),
         );
@@ -88,7 +88,7 @@ class AddProductController extends GetxController {
           'Error', 
           e.toString().replaceAll('Exception: ', ''),
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.1),
+          backgroundColor: Colors.red.withValues(alpha: 0.1),
           colorText: Colors.red[800],
           duration: const Duration(seconds: 4),
         );

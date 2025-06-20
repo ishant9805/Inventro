@@ -82,7 +82,7 @@ class DashboardController extends GetxController {
         'Error', 
         'Failed to delete product: ${e.toString().replaceAll('Exception: ', '')}',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
+        backgroundColor: Colors.red.withValues(alpha: 25),
         colorText: Colors.red[800],
         duration: const Duration(seconds: 3),
       );
@@ -117,7 +117,7 @@ class DashboardController extends GetxController {
           'Backend Test Failed', 
           'Error: ${result['error'] ?? 'Unknown error'}',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.1),
+          backgroundColor: Colors.red.withValues(alpha: 25),
           colorText: Colors.red[800],
           duration: const Duration(seconds: 5),
         );
@@ -127,7 +127,7 @@ class DashboardController extends GetxController {
         'Test Error', 
         'Failed to test backend: $e',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
+        backgroundColor: Colors.red.withValues(alpha: 25),
         colorText: Colors.red[800],
         duration: const Duration(seconds: 5),
       );

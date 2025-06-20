@@ -4,12 +4,14 @@ import 'package:inventro/app/modules/auth/views/manager/add_employee_screen.dart
 import 'package:inventro/app/modules/auth/views/manager/add_product_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/dashboard.dart';
 import 'package:inventro/app/modules/auth/views/manager/employee_list_screen.dart';
+import 'package:inventro/app/modules/auth/views/manager/login_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/profile_screen.dart';
 import 'package:inventro/app/modules/auth/views/role_selection_screen.dart';
 import 'package:inventro/app/modules/auth/views/splash_screen.dart';
-import '../modules/auth/views/manager/login_screen.dart';
 import '../modules/auth/views/manager/register_screen.dart';
 import '../modules/auth/views/manager/company_creation_page.dart';
+import '../modules/auth/views/manager/create_company_screen.dart';
+import '../modules/auth/views/manager/manager_registration_screen.dart';
 
 import 'app_routes.dart';
 
@@ -35,7 +37,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.dashboard,
-      page: () => ManagerDashboard(), // will create later after login
+      page: () => ManagerDashboard(),
     ),
     GetPage(
       name: AppRoutes.addEmployee,
@@ -64,6 +66,14 @@ class AppPages {
     GetPage(
       name: AppRoutes.registerManager,
       page: () => RegisterScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.createCompanyScreen,
+      page: () => const CreateCompanyScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.managerRegistration,
+      page: () => const ManagerRegistrationScreen(),
     ),
   ];
 }

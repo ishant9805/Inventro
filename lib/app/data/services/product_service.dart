@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../modules/auth/controller/auth_controller.dart';
 import 'package:path/path.dart' as path;
 
@@ -175,23 +176,21 @@ class ProductService {
   // GET ALL PRODUCTS
   Future<List<Map<String, dynamic>>> getProducts() async {
     try {
-      final endpoint = path.join(baseUrl, 'manager/inventory/'); // Ensure trailing slash
-      final authController = Get.find<AuthController>();
-      final tokenValue = authController.user.value?.token;
-
-      if (tokenValue == null || tokenValue.isEmpty) {
+      final endpoint = path.join(baseUrl, 'products/'); // Correct endpoint
+      final storage = GetStorage();
+      final token = storage.read('token');
+      print('Fetching products with token: $token');
+      if (token == null || token.isEmpty) {
         throw Exception('No authentication token found. Please login again.');
       }
-
-      final token = tokenValue.trim(); // Trim whitespace
       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
-
       final response = await http
           .get(
             uri,
             headers: {
               'accept': 'application/json',
-              'Authorization': 'Bearer $token', // Use trimmed token
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
             },
           )
           .timeout(
@@ -202,6 +201,8 @@ class ProductService {
               );
             },
           );
+      print('Status: \\${response.statusCode}');
+      print('Body: \\${response.body}');
       if (response.statusCode == 200) {
         return _safeJsonDecodeArray(response.body, response.statusCode);
       } else {
@@ -209,7 +210,7 @@ class ProductService {
         throw Exception(
           errorData['message'] ??
               errorData['detail'] ??
-              'Failed to fetch products (${response.statusCode})',
+              'Failed to fetch products (\${response.statusCode})',
         );
       }
     } on http.ClientException {
@@ -224,7 +225,7 @@ class ProductService {
       if (e.toString().contains('Exception:')) {
         rethrow;
       }
-      throw Exception('Network error: ${e.toString()}');
+      throw Exception('Network error: \\${e.toString()}');
     }
   }
 

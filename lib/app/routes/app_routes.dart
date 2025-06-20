@@ -15,4 +15,6 @@ abstract class AppRoutes {
   static const String managerAddCompany = '/manager-add-company';
   static const String companyCreation = '/companyCreation';
   static const String registerManager = '/registerManager';
+  static const String createCompanyScreen = '/createCompanyScreen';
+  static const String managerRegistration = '/managerRegistration';
 }
