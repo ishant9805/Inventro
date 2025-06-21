@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 import 'package:inventro/app/modules/auth/controller/dashboard_controller.dart';
 import '../../../data/services/product_service.dart';
 
@@ -41,23 +40,17 @@ class AddProductController extends GetxController {
     if (_validateFields()) {
       isLoading.value = true;
       try {
-        // Get manager_id from AuthController
-        final authController = Get.find<AuthController>();
-        final managerId = authController.user.value?.id;
-        if (managerId == null) {
-          Get.snackbar('Error', 'Manager ID not found. Please login again.');
-          isLoading.value = false;
-          return;
-        }
-        // Prepare data according to backend schema
+        // Convert expiry date from DD/MM/YYYY to YYYY-MM-DD format
+        String formattedExpiryDate = _formatExpiryDateForBackend(expiryDateController.text.trim());
+        
+        // Prepare data according to your requirements
         final productData = {
           'part_number': partNumberController.text.trim(),
           'description': descriptionController.text.trim(),
           'location': locationController.text.trim(),
           'quantity': int.tryParse(quantityController.text.trim()) ?? 0,
-          'batch_number': batchNumberController.text.trim(),
-          'expiry_date': expiryDateController.text.trim(),
-          'manager_id': managerId,
+          'batch_number': int.tryParse(batchNumberController.text.trim()) ?? 0,
+          'expiry_date': formattedExpiryDate, // Format: YYYY-MM-DD
         };
 
         print('Submitting product data: $productData');
@@ -74,12 +67,16 @@ class AddProductController extends GetxController {
         );
         
         _clearFields();
-        Get.offAllNamed('/dashboard');
-        // Ensure dashboard product list is refreshed after adding
+        
+        // Refresh the product list on dashboard
         final dashboardController = Get.isRegistered<DashboardController>()
             ? Get.find<DashboardController>()
             : null;
         dashboardController?.refreshProducts();
+        
+        // Navigate back to dashboard
+        Get.offAllNamed('/dashboard');
+        
         print('Product added successfully: $result');
         
       } catch (e) {
@@ -96,6 +93,24 @@ class AddProductController extends GetxController {
         isLoading.value = false;
       }
     }
+  }
+
+  // Helper method to format expiry date from DD/MM/YYYY to YYYY-MM-DD
+  String _formatExpiryDateForBackend(String dateString) {
+    try {
+      final parts = dateString.split('/');
+      if (parts.length == 3) {
+        final day = parts[0].padLeft(2, '0');
+        final month = parts[1].padLeft(2, '0');
+        final year = parts[2];
+        return '$year-$month-$day';
+      }
+    } catch (e) {
+      print('Error formatting date: $e');
+    }
+    // If parsing fails, return today's date in YYYY-MM-DD format
+    final now = DateTime.now();
+    return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
   }
 
   bool _validateFields() {

@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class ProductModel {
   final int? id;
   final String partNumber;
@@ -6,6 +8,7 @@ class ProductModel {
   final int quantity;
   final int batchNumber;
   final String expiryDate;
+  final int? companyId;
   final String? createdAt;
   final String? updatedAt;
 
@@ -17,6 +20,7 @@ class ProductModel {
     required this.quantity,
     required this.batchNumber,
     required this.expiryDate,
+    this.companyId,
     this.createdAt,
     this.updatedAt,
   });
@@ -31,8 +35,9 @@ class ProductModel {
       quantity: json['quantity'] ?? 0,
       batchNumber: json['batch_number'] ?? 0,
       expiryDate: json['expiry_date'] ?? '',
+      companyId: json['company_id'],
       createdAt: json['created_at'],
-      updatedAt: json['updated_on'],
+      updatedAt: json['updated_on'] ?? json['updated_at'],
     );
   }
 
@@ -46,6 +51,7 @@ class ProductModel {
       'quantity': quantity,
       'batch_number': batchNumber,
       'expiry_date': expiryDate,
+      if (companyId != null) 'company_id': companyId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     };
@@ -79,6 +85,19 @@ class ProductModel {
       return difference.inDays;
     } catch (e) {
       return 0;
+    }
+  }
+
+  // Helper method to format created_at for display
+  String get formattedCreatedAt {
+    if (createdAt == null) return 'Date added: Not available';
+
+    try {
+      final dateTime = DateTime.parse(createdAt!);
+      final formatter = DateFormat.yMMMMd().add_jm();
+      return 'Added on: ${formatter.format(dateTime)}';
+    } catch (e) {
+      return 'Added on: ${createdAt!}';
     }
   }
 

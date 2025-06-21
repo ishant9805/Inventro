@@ -75,6 +75,7 @@ class ProductGrid extends StatelessWidget {
           const SizedBox(height: 20),
           
           Obx(() {
+            // Show loading spinner for initial load
             if (dashboardController.isLoading.value && dashboardController.products.isEmpty) {
               return Container(
                 padding: const EdgeInsets.all(40),
@@ -86,6 +87,65 @@ class ProductGrid extends StatelessWidget {
               );
             }
             
+            // Show error state with retry option
+            if (dashboardController.hasError.value && dashboardController.products.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.all(40),
+                child: Column(
+                  children: [
+                    Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Failed to Load Products',
+                      style: TextStyle(fontSize: 18, color: Colors.red[600], fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      dashboardController.errorMessage.value.isNotEmpty 
+                        ? dashboardController.errorMessage.value
+                        : 'Unable to connect to server. Please check your internet connection.',
+                      style: TextStyle(color: Colors.grey[600]),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: dashboardController.retryFetch,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4A00E0),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        OutlinedButton.icon(
+                          onPressed: dashboardController.testBackendConnection,
+                          icon: const Icon(Icons.network_check),
+                          label: const Text('Test Connection'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF4A00E0),
+                            side: const BorderSide(color: Color(0xFF4A00E0)),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }
+            
+            // Show empty state when no products but no error
             if (dashboardController.products.isEmpty) {
               return Container(
                 padding: const EdgeInsets.all(40),
@@ -102,11 +162,26 @@ class ProductGrid extends StatelessWidget {
                       'Add your first product to get started',
                       style: TextStyle(color: Colors.grey[500]),
                     ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: dashboardController.refreshProducts,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Refresh'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4A00E0),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               );
             }
             
+            // Show products list
             return ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),

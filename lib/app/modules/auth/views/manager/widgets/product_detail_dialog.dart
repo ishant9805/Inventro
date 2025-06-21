@@ -135,7 +135,7 @@ class ProductDetailDialog extends StatelessWidget {
                         Icons.history,
                         [
                           if (product.createdAt != null)
-                            _buildDetailItem('Created', _formatDateTime(_safeString(product.createdAt)), Icons.add_circle_outline),
+                            _buildDetailItem('Date Added', product.formattedCreatedAt, Icons.add_circle_outline),
                           if (product.updatedAt != null)
                             _buildDetailItem('Last Updated', _formatDateTime(_safeString(product.updatedAt)), Icons.update),
                         ],
@@ -236,8 +236,7 @@ class ProductDetailDialog extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
+      ));
   }
 
   Widget _buildInfoCard(String title, IconData icon, List<Widget> children) {

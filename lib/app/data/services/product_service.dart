@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import '../../modules/auth/controller/auth_controller.dart';
 import 'package:path/path.dart' as path;
 
@@ -99,24 +98,36 @@ class ProductService {
     }
   }
 
-  // ADD PRODUCT - Following backend schema
+  // ADD PRODUCT - Following your requirements
   Future<Map<String, dynamic>> addProduct(
     Map<String, dynamic> productData,
   ) async {
     try {
-      final endpoint = path.join(baseUrl, 'manager/inventory/'); // Ensure trailing slash
+      final endpoint = path.join(baseUrl, 'products/');
       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
 
-      // Transform data to match backend schema
-      final transformedData = {
+      // Get manager's company ID from auth controller
+      final authController = Get.find<AuthController>();
+      final managerCompanyId = authController.user.value?.companyId ??
+          authController.user.value?.company?.id;
+
+      if (managerCompanyId == null) {
+        throw Exception('Manager company ID not found. Please login again.');
+      }
+
+      // Capture local date-time
+      final createdAt = DateTime.now().toIso8601String();
+
+      // Create payload matching your requirements
+      final payload = {
         "part_number": productData['part_number'],
         "description": productData['description'],
         "location": productData['location'],
         "quantity": productData['quantity'],
-        "batch_number":
-            int.tryParse(productData['batch_number'].toString()) ?? 0,
-        "expiry_date": _formatDateForBackend(productData['expiry_date']),
-        "manager_id": productData['manager_id'], // Add the missing manager_id field
+        "batch_number": productData['batch_number'],
+        "expiry_date": productData['expiry_date'], // Expected format: "YYYY-MM-DD"
+        "company_id": managerCompanyId,
+        "created_at": createdAt,
       };
 
       final authHeaders = getAuthHeaders();
@@ -128,8 +139,8 @@ class ProductService {
       final response = await http
           .post(
             uri,
-            headers: requestHeaders, // Use updated headers
-            body: jsonEncode(transformedData),
+            headers: requestHeaders,
+            body: jsonEncode(payload),
           )
           .timeout(
             const Duration(seconds: 30),
@@ -157,11 +168,11 @@ class ProductService {
               'Failed to add product (${response.statusCode})',
         );
       }
-    } on http.ClientException catch (e) {
+    } on http.ClientException {
       throw Exception(
         'Network connection error. Please check your internet connection.',
       );
-    } on FormatException catch (e) {
+    } on FormatException {
       throw Exception(
         'Invalid server response format. Please try again later.',
       );
@@ -176,22 +187,29 @@ class ProductService {
   // GET ALL PRODUCTS
   Future<List<Map<String, dynamic>>> getProducts() async {
     try {
-      final endpoint = path.join(baseUrl, 'products/'); // Correct endpoint
-      final storage = GetStorage();
-      final token = storage.read('token');
-      print('Fetching products with token: $token');
-      if (token == null || token.isEmpty) {
-        throw Exception('No authentication token found. Please login again.');
-      }
+      print('🔄 Starting product fetch...');
+
+      // Use centralized auth headers method
+      final authHeaders = getAuthHeaders();
+      print('✅ Token retrieved and validated');
+
+      final endpoint = path.join(baseUrl, 'products/');
       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
+      print('🌐 Endpoint: $uri');
+
+      final requestHeaders = {
+        ...authHeaders,
+        'Content-Type': 'application/json',
+      };
+
+      // Log token for debugging (first 20 chars only for security)
+      final token = authHeaders['Authorization']?.replaceAll('Bearer ', '') ?? '';
+      print('🔑 Token preview: ${token.length > 20 ? token.substring(0, 20) + '...' : token}');
+
       final response = await http
           .get(
             uri,
-            headers: {
-              'accept': 'application/json',
-              'Authorization': 'Bearer $token',
-              'Content-Type': 'application/json',
-            },
+            headers: requestHeaders,
           )
           .timeout(
             const Duration(seconds: 30),
@@ -201,31 +219,41 @@ class ProductService {
               );
             },
           );
-      print('Status: \\${response.statusCode}');
-      print('Body: \\${response.body}');
+
+      print('📊 Response Status: ${response.statusCode}');
+      print('📄 Response Headers: ${response.headers}');
+      print('📝 Response Body (first 500 chars): ${response.body.length > 500 ? response.body.substring(0, 500) + '...' : response.body}');
+
       if (response.statusCode == 200) {
-        return _safeJsonDecodeArray(response.body, response.statusCode);
+        final products = _safeJsonDecodeArray(response.body, response.statusCode);
+        print('✅ Successfully parsed ${products.length} products');
+        return products;
       } else {
         final errorData = _safeJsonDecode(response.body, response.statusCode);
-        throw Exception(
-          errorData['message'] ??
-              errorData['detail'] ??
-              'Failed to fetch products (\${response.statusCode})',
-        );
+        final errorMessage = errorData['message'] ??
+            errorData['detail'] ??
+            errorData['error'] ??
+            'Failed to fetch products (${response.statusCode})';
+
+        print('❌ API Error: $errorMessage');
+        throw Exception(errorMessage);
       }
-    } on http.ClientException {
+    } on http.ClientException catch (e) {
+      print('❌ Network Error: ${e.message}');
       throw Exception(
         'Network connection error. Please check your internet connection.',
       );
-    } on FormatException {
+    } on FormatException catch (e) {
+      print('❌ JSON Parse Error: ${e.message}');
       throw Exception(
         'Invalid server response format. Please try again later.',
       );
     } catch (e) {
+      print('❌ Unexpected Error: $e');
       if (e.toString().contains('Exception:')) {
         rethrow;
       }
-      throw Exception('Network error: \\${e.toString()}');
+      throw Exception('Network error: ${e.toString()}');
     }
   }
 
@@ -298,7 +326,7 @@ class ProductService {
             int.tryParse(productData['batch_number'].toString()) ?? 0,
         "expiry_date": _formatDateForBackend(productData['expiry_date']),
       };
-      
+
       final authHeaders = getAuthHeaders();
       final requestHeaders = {
         ...authHeaders,
@@ -386,10 +414,12 @@ class ProductService {
         );
       }
     } on http.ClientException catch (e) {
+      print('❌ Delete Network Error: ${e.message}');
       throw Exception(
         'Network connection error. Please check your internet connection.',
       );
     } on FormatException catch (e) {
+      print('❌ Delete JSON Parse Error: ${e.message}');
       throw Exception(
         'Invalid server response format. Please try again later.',
       );
