@@ -170,6 +170,24 @@ class ProductDetailDialog extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton.icon(
+                        onPressed: () => _navigateToEdit(),
+                        icon: const Icon(Icons.edit, color: Colors.white),
+                        label: const Text(
+                          'Edit',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4A00E0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
                         onPressed: () => _showDeleteConfirmation(),
                         icon: const Icon(Icons.delete, color: Colors.white),
                         label: const Text(
@@ -406,6 +424,12 @@ class ProductDetailDialog extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _navigateToEdit() {
+    Get.back(); // Close the dialog first
+    // Navigate to the edit page with product data
+    Get.toNamed('/edit-product', arguments: product);
   }
 
   // Helper method to safely convert any value to string

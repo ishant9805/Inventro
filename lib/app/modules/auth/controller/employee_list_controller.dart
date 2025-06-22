@@ -6,12 +6,41 @@ import '../../../data/models/employee_model.dart';
 class EmployeeListController extends GetxController {
   final isLoading = false.obs;
   final employees = <EmployeeModel>[].obs;
+  final filteredEmployees = <EmployeeModel>[].obs;
+  final searchQuery = ''.obs;
+  final searchController = TextEditingController();
   final EmployeeService _employeeService = EmployeeService();
 
   @override
   void onInit() {
     super.onInit();
     loadEmployees();
+    // Listen to search changes
+    searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
+  }
+
+  void _onSearchChanged() {
+    searchQuery.value = searchController.text;
+    _filterEmployees();
+  }
+
+  void _filterEmployees() {
+    if (searchQuery.value.isEmpty) {
+      filteredEmployees.value = employees;
+    } else {
+      filteredEmployees.value = employees.where((employee) {
+        final query = searchQuery.value.toLowerCase();
+        return employee.name.toLowerCase().contains(query) ||
+               employee.email.toLowerCase().contains(query) ||
+               employee.department.toLowerCase().contains(query);
+      }).toList();
+    }
   }
 
   Future<void> loadEmployees() async {
@@ -21,6 +50,9 @@ class EmployeeListController extends GetxController {
       employees.value = employeeList
           .map((data) => EmployeeModel.fromJson(data))
           .toList();
+      
+      // Update filtered list
+      _filterEmployees();
       
       print('Loaded ${employees.length} employees');
     } catch (e) {
@@ -43,8 +75,17 @@ class EmployeeListController extends GetxController {
       // Show confirmation dialog
       final confirmed = await Get.dialog<bool>(
         AlertDialog(
-          title: const Text('Delete Employee'),
-          content: Text('Are you sure you want to delete $employeeName?'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.orange[600]),
+              const SizedBox(width: 12),
+              const Text('Delete Employee'),
+            ],
+          ),
+          content: Text('Are you sure you want to delete $employeeName? This action cannot be undone.'),
           actions: [
             TextButton(
               onPressed: () => Get.back(result: false),
@@ -54,6 +95,9 @@ class EmployeeListController extends GetxController {
               onPressed: () => Get.back(result: true),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Text('Delete', style: TextStyle(color: Colors.white)),
             ),
@@ -65,8 +109,9 @@ class EmployeeListController extends GetxController {
         isLoading.value = true;
         await _employeeService.deleteEmployee(employeeId);
         
-        // Remove from local list
+        // Remove from both lists
         employees.removeWhere((emp) => emp.id == employeeId);
+        filteredEmployees.removeWhere((emp) => emp.id == employeeId);
         
         Get.snackbar(
           'Success',
@@ -94,5 +139,11 @@ class EmployeeListController extends GetxController {
 
   void refreshEmployees() {
     loadEmployees();
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    searchQuery.value = '';
+    _filterEmployees();
   }
 }

@@ -6,6 +6,7 @@ abstract class AppRoutes {
   static const String dashboard = '/dashboard';
   static const String addEmployee = '/add-employee';
   static const String addProduct = '/add-product';
+  static const String editProduct = '/edit-product';
   static const String managerProfile = '/manager-profile';
   static const String employeeList = '/employee-list';
   static const String employeeLogin = '/employee-login';

@@ -6,6 +6,9 @@ import '../../../data/models/product_model.dart';
 class DashboardController extends GetxController {
   final isLoading = false.obs;
   final products = <ProductModel>[].obs;
+  final filteredProducts = <ProductModel>[].obs;
+  final searchQuery = ''.obs;
+  final searchController = TextEditingController();
   final ProductService _productService = ProductService();
 
   // Add error message observable
@@ -16,6 +19,33 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProducts();
+    // Listen to search changes
+    searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
+  }
+
+  void _onSearchChanged() {
+    searchQuery.value = searchController.text;
+    _filterProducts();
+  }
+
+  void _filterProducts() {
+    if (searchQuery.value.isEmpty) {
+      filteredProducts.value = products;
+    } else {
+      filteredProducts.value = products.where((product) {
+        final query = searchQuery.value.toLowerCase();
+        return product.partNumber.toLowerCase().contains(query) ||
+               product.description.toLowerCase().contains(query) ||
+               product.location.toLowerCase().contains(query) ||
+               product.batchNumber.toString().contains(query);
+      }).toList();
+    }
   }
 
   // Fetch all products from backend
@@ -51,6 +81,8 @@ class DashboardController extends GetxController {
       }
       
       products.value = productList;
+      // Update filtered products
+      _filterProducts();
       print('✅ DashboardController: Successfully loaded ${products.length} products');
       
     } catch (e) {
@@ -177,5 +209,11 @@ class DashboardController extends GetxController {
         duration: const Duration(seconds: 5),
       );
     }
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    searchQuery.value = '';
+    _filterProducts();
   }
 }

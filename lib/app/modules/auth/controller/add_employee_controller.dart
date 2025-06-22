@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
+import 'package:inventro/app/modules/auth/controller/employee_list_controller.dart';
 import '../../../data/services/employee_service.dart';
 
 class AddEmployeeController extends GetxController {
@@ -145,6 +146,21 @@ class AddEmployeeController extends GetxController {
     );
   }
 
+  Future<void> _showSuccessDialog() async {
+    return Get.dialog(
+      AlertDialog(
+        title: const Text('Success'),
+        content: const Text('Employee added successfully!'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> addEmployee() async {
     if (_validateFields()) {
       final authController = Get.find<AuthController>();
@@ -182,18 +198,24 @@ class AddEmployeeController extends GetxController {
 
         final result = await _employeeService.addEmployee(employeeData);
 
-        Get.snackbar(
-          'Success',
-          'Employee "${nameController.text.trim()}" added successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withValues(alpha: 0.1),
-          colorText: Colors.green[800],
-          duration: const Duration(seconds: 3),
-        );
-
+        // Enhanced success confirmation with dialog
+        await _showSuccessDialog();
+        
         _clearFields();
         currentEmployeeCount.value = newEmployeeCount;
-        Get.offAllNamed('/dashboard');
+        
+        // Navigate to employee list with a slight delay for better UX
+        await Future.delayed(const Duration(milliseconds: 500));
+        Get.offNamed('/employee-list'); // Navigate to employee list
+        
+        // Refresh employee list if controller exists
+        try {
+          final employeeListController = Get.find<EmployeeListController>();
+          employeeListController.refreshEmployees();
+        } catch (e) {
+          // Employee list controller not found, that's okay
+        }
+        
       } catch (e) {
         print('Error adding employee: $e');
         Get.snackbar(
