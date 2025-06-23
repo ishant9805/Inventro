@@ -125,7 +125,7 @@ class LoginScreen extends StatelessWidget {
                       children: [
                         const Text("Don't have an account? "),
                         GestureDetector(
-                          onTap: () => Get.toNamed(AppRoutes.registerManager),
+                          onTap: () => Get.offAllNamed(AppRoutes.roleSelection),
                           child: const Text(
                             "Register",
                             style: TextStyle(
