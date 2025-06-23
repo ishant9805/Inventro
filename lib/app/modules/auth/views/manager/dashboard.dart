@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/auth_controller.dart';
 import '../../controller/dashboard_controller.dart';
-import 'widgets/dashboard_header.dart';
-import 'widgets/welcome_card.dart';
+import 'widgets/unified_dashboard_card.dart';
 import 'widgets/dashboard_actions.dart';
 import 'widgets/dashboard_stat_cards.dart';
 import 'widgets/product_grid.dart';
@@ -41,12 +40,8 @@ class ManagerDashboard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header with logo and profile
-                  DashboardHeader(authController: authController),
-                  const SizedBox(height: 24),
-                  
-                  // Welcome Card
-                  WelcomeCard(authController: authController),
+                  // Unified Header and Welcome Card
+                  UnifiedDashboardCard(authController: authController),
                   const SizedBox(height: 24),
                   
                   // Quick Actions
