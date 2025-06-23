@@ -12,31 +12,34 @@ class EditProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: _buildAppBar(),
-      body: SafeArea(
-        child: Obx(() {
-          if (!controller.isInitialized.value) {
-            return const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A00E0)),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: _buildAppBar(),
+        body: SafeArea(
+          child: Obx(() {
+            if (!controller.isInitialized.value) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A00E0)),
+                ),
+              );
+            }
+            
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const EditProductHeader(),
+                  const SizedBox(height: 32),
+                  EditProductForm(controller: controller),
+                ],
               ),
             );
-          }
-          
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const EditProductHeader(),
-                const SizedBox(height: 32),
-                EditProductForm(controller: controller),
-              ],
-            ),
-          );
-        }),
+          }),
+        ),
       ),
     );
   }

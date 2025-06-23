@@ -24,42 +24,45 @@ class ManagerDashboard extends StatelessWidget {
       Color(0xFF8F00FF),
     ];
 
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradientColors,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: gradientColors,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with logo and profile
-                DashboardHeader(authController: authController),
-                const SizedBox(height: 24),
-                
-                // Welcome Card
-                WelcomeCard(authController: authController),
-                const SizedBox(height: 24),
-                
-                // Quick Actions
-                const DashboardActions(),
-                const SizedBox(height: 24),
-                
-                // Statistics Cards
-                DashboardStatCards(dashboardController: dashboardController),
-                const SizedBox(height: 24),
-                
-                // Inventory Section
-                ProductGrid(dashboardController: dashboardController),
-                
-                const SizedBox(height: 32),
-              ],
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with logo and profile
+                  DashboardHeader(authController: authController),
+                  const SizedBox(height: 24),
+                  
+                  // Welcome Card
+                  WelcomeCard(authController: authController),
+                  const SizedBox(height: 24),
+                  
+                  // Quick Actions
+                  const DashboardActions(),
+                  const SizedBox(height: 24),
+                  
+                  // Statistics Cards
+                  DashboardStatCards(dashboardController: dashboardController),
+                  const SizedBox(height: 24),
+                  
+                  // Inventory Section
+                  ProductGrid(dashboardController: dashboardController),
+                  
+                  const SizedBox(height: 32),
+                ],
+              ),
             ),
           ),
         ),

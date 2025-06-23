@@ -20,12 +20,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? companyError;
   bool isCompanyValidated = false;
 
+  // Add these as class-level variables
+  bool isExistingCompany = false;
+  Map<String, dynamic>? companyDataArg;
+
   @override
   void initState() {
     super.initState();
     final args = Get.arguments as Map<String, dynamic>?;
     final String? companyIdArg = args != null ? args['companyId'] as String? : null;
-    final bool isExistingCompany = companyIdArg != null;
+    companyDataArg = args != null ? args['companyData'] : null;
+    isExistingCompany = companyIdArg != null;
+
     if (!isExistingCompany) {
       // Add New Company: create company and set companyId
       _createNewCompany();
@@ -101,62 +107,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final args = Get.arguments as Map<String, dynamic>?;
-    final String? companyIdArg = args != null ? args['companyId'] as String? : null;
-    final Map<String, dynamic>? companyDataArg = args != null ? args['companyData'] as Map<String, dynamic>? : null;
-    final bool isExistingCompany = companyIdArg != null && (companyDataArg == null);
-    if (isExistingCompany && companyIdController.text.isEmpty && companyIdArg != null) {
-      companyIdController.text = companyIdArg;
-    }
-    // If companyDataArg is present, use it for display and set companyId
-    if (companyDataArg != null && companyIdController.text.isEmpty) {
-      companyIdController.text = companyDataArg['id'].toString();
-      companyData = companyDataArg;
-      isCompanyValidated = true;
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () {
-            Get.offAllNamed(AppRoutes.roleSelection);
-          },
-          tooltip: "Back to Role Selection",
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black87),
+            onPressed: () {
+              Get.offAllNamed(AppRoutes.roleSelection);
+            },
+            tooltip: "Back to Role Selection",
+          ),
         ),
-      ),
-      extendBodyBehindAppBar: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: Colors.white,
-        child: Center(
-          child: SingleChildScrollView(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: Colors.white.withAlpha(210),
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(50),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: ManagerRegistrationForm(
-                isExistingCompany: isExistingCompany,
-                companyIdController: companyIdController,
-                companyData: companyDataArg ?? companyData,
-                companyError: companyError,
-                authController: authController,
-                isLoadingCompany: isLoadingCompany,
-                isCompanyValidated: isExistingCompany ? isCompanyValidated : true,
-                onValidateCompany: _validateCompanyId,
+        extendBodyBehindAppBar: true,
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: Colors.white,
+          child: Center(
+            child: SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(210),
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(50),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ManagerRegistrationForm(
+                  isExistingCompany: isExistingCompany,
+                  companyIdController: companyIdController,
+                  companyData: companyDataArg ?? companyData,
+                  companyError: companyError,
+                  authController: authController,
+                  isLoadingCompany: isLoadingCompany,
+                  isCompanyValidated: isExistingCompany ? isCompanyValidated : true,
+                  onValidateCompany: _validateCompanyId,
+                ),
               ),
             ),
           ),

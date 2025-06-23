@@ -76,237 +76,239 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
       Color(0xFF8F00FF),
     ];
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradientColors,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: gradientColors,
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Custom App Bar
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Get.back(),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
+          child: SafeArea(
+            child: Column(
+              children: [
+                // Custom App Bar
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Get.back(),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new,
+                            color: Colors.white,
+                            size: 20,
                           ),
                         ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new,
+                      ),
+                      const Spacer(),
+                      const Text(
+                        'Create Company',
+                        style: TextStyle(
                           color: Colors.white,
-                          size: 20,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    const Spacer(),
-                    const Text(
-                      'Create Company',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                      const Spacer(),
+                      const SizedBox(width: 44), // Balance the back button
+                    ],
+                  ),
+                ),
+                
+                // Main Content
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(32),
+                        topRight: Radius.circular(32),
                       ),
                     ),
-                    const Spacer(),
-                    const SizedBox(width: 44), // Balance the back button
-                  ],
-                ),
-              ),
-              
-              // Main Content
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 20),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(32),
-                      topRight: Radius.circular(32),
-                    ),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(28),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Header Section
-                            Center(
-                              child: Container(
-                                width: 60,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade300,
-                                  borderRadius: BorderRadius.circular(3),
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(28),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Header Section
+                              Center(
+                                child: Container(
+                                  width: 60,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade300,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 32),
-                            
-                            Center(
-                              child: Container(
-                                padding: const EdgeInsets.all(20),
+                              const SizedBox(height: 32),
+                              
+                              Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: gradientColors,
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF4A00E0).withOpacity(0.3),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.business,
+                                    size: 40,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              
+                              const SizedBox(height: 24),
+                              
+                              const Center(
+                                child: Text(
+                                  'Setup Your Company',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1A202C),
+                                  ),
+                                ),
+                              ),
+                              
+                              const SizedBox(height: 8),
+                              
+                              Center(
+                                child: Text(
+                                  'Create your company profile to get started with Inventro',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey.shade600,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                              
+                              const SizedBox(height: 40),
+                              
+                              // Company Name Field
+                              _buildInputField(
+                                controller: nameController,
+                                label: 'Company Name',
+                                hint: 'Enter your unique company name',
+                                icon: Icons.business_outlined,
+                                validator: (val) {
+                                  if (val == null || val.trim().isEmpty) {
+                                    return 'Company name is required';
+                                  }
+                                  if (val.trim().toLowerCase() == 'new company') {
+                                    return 'Please choose a unique name';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              
+                              const SizedBox(height: 24),
+                              
+                              // Company Size Field
+                              _buildInputField(
+                                controller: sizeController,
+                                label: 'Company Size',
+                                hint: 'Number of employees (optional)',
+                                icon: Icons.people_outline,
+                                keyboardType: TextInputType.number,
+                              ),
+                              
+                              const SizedBox(height: 32),
+                              
+                              // Error Message
+                              if (errorMessage != null) ...[
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.red.shade200,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: Colors.red.shade600,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          errorMessage!,
+                                          style: TextStyle(
+                                            color: Colors.red.shade700,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+                              
+                              // Create Button
+                              Container(
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: gradientColors,
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF4A00E0).withOpacity(0.3),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 8),
+                                      color: const Color(0xFF4A00E0).withOpacity(0.4),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 6),
                                     ),
                                   ],
                                 ),
-                                child: const Icon(
-                                  Icons.business,
-                                  size: 40,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            
-                            const SizedBox(height: 24),
-                            
-                            const Center(
-                              child: Text(
-                                'Setup Your Company',
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1A202C),
-                                ),
-                              ),
-                            ),
-                            
-                            const SizedBox(height: 8),
-                            
-                            Center(
-                              child: Text(
-                                'Create your company profile to get started with Inventro',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey.shade600,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ),
-                            
-                            const SizedBox(height: 40),
-                            
-                            // Company Name Field
-                            _buildInputField(
-                              controller: nameController,
-                              label: 'Company Name',
-                              hint: 'Enter your unique company name',
-                              icon: Icons.business_outlined,
-                              validator: (val) {
-                                if (val == null || val.trim().isEmpty) {
-                                  return 'Company name is required';
-                                }
-                                if (val.trim().toLowerCase() == 'new company') {
-                                  return 'Please choose a unique name';
-                                }
-                                return null;
-                              },
-                            ),
-                            
-                            const SizedBox(height: 24),
-                            
-                            // Company Size Field
-                            _buildInputField(
-                              controller: sizeController,
-                              label: 'Company Size',
-                              hint: 'Number of employees (optional)',
-                              icon: Icons.people_outline,
-                              keyboardType: TextInputType.number,
-                            ),
-                            
-                            const SizedBox(height: 32),
-                            
-                            // Error Message
-                            if (errorMessage != null) ...[
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.shade50,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.red.shade200,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.error_outline,
-                                      color: Colors.red.shade600,
-                                      size: 20,
+                                child: ElevatedButton(
+                                  onPressed: isLoading ? null : _createCompany,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    minimumSize: const Size.fromHeight(56),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        errorMessage!,
-                                        style: TextStyle(
-                                          color: Colors.red.shade700,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                            ],
-                            
-                            // Create Button
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: gradientColors,
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF4A00E0).withOpacity(0.4),
-                                    blurRadius: 15,
-                                    offset: const Offset(0, 6),
                                   ),
-                                ],
-                              ),
-                              child: ElevatedButton(
-                                onPressed: isLoading ? null : _createCompany,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  shadowColor: Colors.transparent,
-                                  minimumSize: const Size.fromHeight(56),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: isLoading
-                                    ? const SizedBox(
+                                  child: isLoading
+                                      ? const SizedBox(
                                         height: 24,
                                         width: 24,
                                         child: CircularProgressIndicator(
@@ -314,7 +316,7 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Row(
+                                      : const Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           Text(
@@ -333,30 +335,31 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
                                           ),
                                         ],
                                       ),
-                              ),
-                            ),
-                            
-                            const SizedBox(height: 32),
-                            
-                            // Footer
-                            Center(
-                              child: Text(
-                                'By creating a company, you agree to our Terms of Service',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade500,
                                 ),
                               ),
-                            ),
-                          ],
+                              
+                              const SizedBox(height: 32),
+                              
+                              // Footer
+                              Center(
+                                child: Text(
+                                  'By creating a company, you agree to our Terms of Service',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
