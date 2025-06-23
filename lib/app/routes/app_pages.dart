@@ -9,7 +9,7 @@ import 'package:inventro/app/modules/auth/views/manager/login_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/profile_screen.dart';
 import 'package:inventro/app/modules/auth/views/role_selection_screen.dart';
 import 'package:inventro/app/modules/auth/views/splash_screen.dart';
-import '../modules/auth/views/manager/register_screen.dart';
+// import '../modules/auth/views/manager/register_screen.dart';
 import '../modules/auth/views/manager/company_creation_page.dart';
 import '../modules/auth/views/manager/create_company_screen.dart';
 import '../modules/auth/views/manager/manager_registration_screen.dart';
@@ -32,10 +32,10 @@ class AppPages {
       name: AppRoutes.login,
       page: () => LoginScreen(),
     ),
-    GetPage(
-      name: AppRoutes.register,
-      page: () => RegisterScreen(),
-    ),
+    // GetPage(
+    //   name: AppRoutes.register,
+    //   page: () => RegisterScreen(),
+    // ),
     GetPage(
       name: AppRoutes.dashboard,
       page: () => ManagerDashboard(),
@@ -68,10 +68,10 @@ class AppPages {
       name: AppRoutes.companyCreation,
       page: () => CompanyCreationPage(),
     ),
-    GetPage(
-      name: AppRoutes.registerManager,
-      page: () => RegisterScreen(),
-    ),
+    // GetPage(
+    //   name: AppRoutes.registerManager,
+    //   page: () => RegisterScreen(),
+    // ),
     GetPage(
       name: AppRoutes.createCompanyScreen,
       page: () => const CreateCompanyScreen(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/modules/auth/controller/dashboard_controller.dart';
+import 'package:inventro/app/utils/responsive_utils.dart';
 
 class ProductDetailDialog extends StatelessWidget {
   final dynamic product;
@@ -16,239 +17,213 @@ class ProductDetailDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 20)),
       ),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFFAFAFA),
-              Color(0xFFF5F5F5),
-            ],
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF4A00E0), Color(0xFF00C3FF)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = ResponsiveUtils.isSmallScreen(context) 
+            ? ResponsiveUtils.screenWidth(context) * 0.95 
+            : 400.0;
+          final maxHeight = ResponsiveUtils.screenHeight(context) * 0.85;
+          
+          return Container(
+            constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 20)),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFFAFAFA),
+                  Color(0xFFF5F5F5),
+                ],
               ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.inventory_2,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                _buildHeader(context),
+                
+                // Content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(ResponsiveUtils.getPadding(context, factor: 0.06)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Product Details',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        // Status Badge
+                        _buildStatusBadge(context),
+                        SizedBox(height: ResponsiveUtils.getSpacing(context, 20)),
+
+                        // Product Info Cards
+                        _buildInfoCard(
+                          context,
+                          'Basic Information',
+                          Icons.info_outline,
+                          [
+                            _buildDetailItem(context, 'Product ID', _safeString(product.id ?? '-'), Icons.tag),
+                            _buildDetailItem(context, 'Part Number', _safeString(product.partNumber), Icons.qr_code),
+                            _buildDetailItem(context, 'Description', _safeString(product.description), Icons.description),
+                            _buildDetailItem(context, 'Batch Number', _safeString(product.batchNumber), Icons.batch_prediction),
+                          ],
                         ),
-                        Text(
-                          _safeString(product.partNumber),
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 14,
-                          ),
+
+                        SizedBox(height: ResponsiveUtils.getSpacing(context, 16)),
+
+                        _buildInfoCard(
+                          context,
+                          'Inventory Details',
+                          Icons.warehouse,
+                          [
+                            _buildDetailItem(context, 'Location', _safeString(product.location), Icons.location_on),
+                            _buildDetailItem(context, 'Quantity', '${_safeString(product.quantity)} units', Icons.inventory),
+                            _buildDetailItem(context, 'Expiry Date', _safeString(product.formattedExpiryDate ?? product.expiryDate), Icons.schedule),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.close, color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
 
-            // Content
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Status Badge
-                    _buildStatusBadge(),
-                    const SizedBox(height: 20),
-
-                    // Product Info Cards
-                    _buildInfoCard(
-                      'Basic Information',
-                      Icons.info_outline,
-                      [
-                        _buildDetailItem('Product ID', _safeString(product.id ?? '-'), Icons.tag),
-                        _buildDetailItem('Part Number', _safeString(product.partNumber), Icons.qr_code),
-                        _buildDetailItem('Description', _safeString(product.description), Icons.description),
-                        _buildDetailItem('Batch Number', _safeString(product.batchNumber), Icons.batch_prediction),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    _buildInfoCard(
-                      'Inventory Details',
-                      Icons.warehouse,
-                      [
-                        _buildDetailItem('Location', _safeString(product.location), Icons.location_on),
-                        _buildDetailItem('Quantity', '${_safeString(product.quantity)} units', Icons.inventory),
-                        _buildDetailItem('Expiry Date', _safeString(product.formattedExpiryDate ?? product.expiryDate), Icons.schedule),
-                      ],
-                    ),
-
-                    if (product.createdAt != null || product.updatedAt != null) ...[
-                      const SizedBox(height: 16),
-                      _buildInfoCard(
-                        'Timeline',
-                        Icons.history,
-                        [
-                          if (product.createdAt != null)
-                            _buildDetailItem('Date Added', product.formattedCreatedAt, Icons.add_circle_outline),
-                          if (product.updatedAt != null)
-                            _buildDetailItem('Last Updated', _formatDateTime(_safeString(product.updatedAt)), Icons.update),
+                        if (product.createdAt != null || product.updatedAt != null) ...[
+                          SizedBox(height: ResponsiveUtils.getSpacing(context, 16)),
+                          _buildInfoCard(
+                            context,
+                            'Timeline',
+                            Icons.history,
+                            [
+                              if (product.createdAt != null)
+                                _buildDetailItem(context, 'Date Added', product.formattedCreatedAt, Icons.add_circle_outline),
+                              if (product.updatedAt != null)
+                                _buildDetailItem(context, 'Last Updated', _formatDateTime(_safeString(product.updatedAt)), Icons.update),
+                            ],
+                          ),
                         ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-
-            // Actions
-            Container(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => Get.back(),
-                      icon: const Icon(Icons.close),
-                      label: const Text('Close'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF6C757D),
-                        side: const BorderSide(color: Color(0xFF6C757D)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
+                      ],
                     ),
                   ),
-                  if (product.id != null) ...[
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _navigateToEdit(),
-                        icon: const Icon(Icons.edit, color: Colors.white),
-                        label: const Text(
-                          'Edit',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4A00E0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showDeleteConfirmation(),
-                        icon: const Icon(Icons.delete, color: Colors.white),
-                        label: const Text(
-                          'Delete',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFDC3545),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+                ),
+
+                // Actions
+                _buildActions(context),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildStatusBadge() {
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(ResponsiveUtils.getPadding(context, factor: 0.06)),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF4A00E0), Color(0xFF00C3FF)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(ResponsiveUtils.getSpacing(context, 20)),
+          topRight: Radius.circular(ResponsiveUtils.getSpacing(context, 20)),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 12)),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
+            ),
+            child: Icon(
+              Icons.inventory_2,
+              color: Colors.white,
+              size: ResponsiveUtils.getIconSize(context, 24),
+            ),
+          ),
+          SizedBox(width: ResponsiveUtils.getSpacing(context, 16)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Product Details',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: ResponsiveUtils.getFontSize(context, 20),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  _safeString(product.partNumber),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: ResponsiveUtils.getFontSize(context, 14),
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => Get.back(),
+            icon: Icon(
+              Icons.close, 
+              color: Colors.white,
+              size: ResponsiveUtils.getIconSize(context, 24),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(BuildContext context) {
     Color statusColor = _getStatusColor();
     IconData statusIcon = _getStatusIcon();
     String statusText = _getStatusText();
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveUtils.getPadding(context, factor: 0.04),
+        vertical: ResponsiveUtils.getSpacing(context, 12),
+      ),
       decoration: BoxDecoration(
         color: statusColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
         border: Border.all(color: statusColor.withOpacity(0.3)),
       ),
       child: Row(
         children: [
-          Icon(statusIcon, color: statusColor, size: 20),
-          const SizedBox(width: 8),
-          Text(
-            statusText,
-            style: TextStyle(
-              color: statusColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+          Icon(
+            statusIcon, 
+            color: statusColor, 
+            size: ResponsiveUtils.getIconSize(context, 20),
+          ),
+          SizedBox(width: ResponsiveUtils.getSpacing(context, 8)),
+          Expanded(
+            child: Text(
+              statusText,
+              style: TextStyle(
+                color: statusColor,
+                fontWeight: FontWeight.bold,
+                fontSize: ResponsiveUtils.getFontSize(context, 14),
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Spacer(),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(
+              horizontal: ResponsiveUtils.getSpacing(context, 8),
+              vertical: ResponsiveUtils.getSpacing(context, 4),
+            ),
             decoration: BoxDecoration(
               color: statusColor,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 8)),
             ),
             child: Text(
               _getQuantity() <= 10 ? 'LOW STOCK' : 'IN STOCK',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 10,
+                fontSize: ResponsiveUtils.getFontSize(context, 10),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -257,16 +232,16 @@ class ProductDetailDialog extends StatelessWidget {
       ));
   }
 
-  Widget _buildInfoCard(String title, IconData icon, List<Widget> children) {
+  Widget _buildInfoCard(BuildContext context, String title, IconData icon, List<Widget> children) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(ResponsiveUtils.getPadding(context, factor: 0.04)),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
+            blurRadius: ResponsiveUtils.getSpacing(context, 8),
             offset: const Offset(0, 2),
           ),
         ],
@@ -277,67 +252,72 @@ class ProductDetailDialog extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 8)),
                 decoration: BoxDecoration(
                   color: const Color(0xFF4A00E0).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 8)),
                 ),
                 child: Icon(
                   icon,
                   color: const Color(0xFF4A00E0),
-                  size: 16,
+                  size: ResponsiveUtils.getIconSize(context, 16),
                 ),
               ),
-              const SizedBox(width: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              SizedBox(width: ResponsiveUtils.getSpacing(context, 12)),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: ResponsiveUtils.getFontSize(context, 16),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: ResponsiveUtils.getSpacing(context, 16)),
           ...children,
         ],
       ),
     );
   }
 
-  Widget _buildDetailItem(String label, String value, IconData icon) {
+  Widget _buildDetailItem(BuildContext context, String label, String value, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: ResponsiveUtils.getSpacing(context, 12)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
             icon,
-            size: 16,
+            size: ResponsiveUtils.getIconSize(context, 16),
             color: const Color(0xFF6C757D),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: ResponsiveUtils.getSpacing(context, 12)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF6C757D),
+                  style: TextStyle(
+                    fontSize: ResponsiveUtils.getFontSize(context, 12),
+                    color: const Color(0xFF6C757D),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: ResponsiveUtils.getSpacing(context, 2)),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: ResponsiveUtils.getFontSize(context, 14),
                     color: Colors.black87,
                     fontWeight: FontWeight.w600,
                   ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -347,18 +327,168 @@ class ProductDetailDialog extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmation() {
+  Widget _buildActions(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(ResponsiveUtils.getPadding(context, factor: 0.06)),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (ResponsiveUtils.isSmallScreen(context)) {
+            // Stack buttons vertically on small screens
+            return _buildVerticalActions(context);
+          } else {
+            // Keep horizontal layout for larger screens
+            return _buildHorizontalActions(context);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildHorizontalActions(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => Get.back(),
+            icon: Icon(Icons.close, size: ResponsiveUtils.getIconSize(context, 18)),
+            label: Text('Close', style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 14))),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF6C757D),
+              side: const BorderSide(color: Color(0xFF6C757D)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
+              ),
+              padding: EdgeInsets.symmetric(vertical: ResponsiveUtils.getSpacing(context, 12)),
+            ),
+          ),
+        ),
+        if (product.id != null) ...[
+          SizedBox(width: ResponsiveUtils.getSpacing(context, 12)),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () => _navigateToEdit(),
+              icon: Icon(Icons.edit, color: Colors.white, size: ResponsiveUtils.getIconSize(context, 18)),
+              label: Text(
+                'Edit',
+                style: TextStyle(color: Colors.white, fontSize: ResponsiveUtils.getFontSize(context, 14)),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4A00E0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
+                ),
+                padding: EdgeInsets.symmetric(vertical: ResponsiveUtils.getSpacing(context, 12)),
+              ),
+            ),
+          ),
+          SizedBox(width: ResponsiveUtils.getSpacing(context, 12)),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () => _showDeleteConfirmation(context),
+              icon: Icon(Icons.delete, color: Colors.white, size: ResponsiveUtils.getIconSize(context, 18)),
+              label: Text(
+                'Delete',
+                style: TextStyle(color: Colors.white, fontSize: ResponsiveUtils.getFontSize(context, 14)),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFDC3545),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
+                ),
+                padding: EdgeInsets.symmetric(vertical: ResponsiveUtils.getSpacing(context, 12)),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildVerticalActions(BuildContext context) {
+    return Column(
+      children: [
+        if (product.id != null) ...[
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _navigateToEdit(),
+                  icon: Icon(Icons.edit, color: Colors.white, size: ResponsiveUtils.getIconSize(context, 18)),
+                  label: Text(
+                    'Edit Product',
+                    style: TextStyle(color: Colors.white, fontSize: ResponsiveUtils.getFontSize(context, 14)),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4A00E0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: ResponsiveUtils.getSpacing(context, 14)),
+                  ),
+                ),
+              ),
+              SizedBox(width: ResponsiveUtils.getSpacing(context, 12)),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => _showDeleteConfirmation(context),
+                  icon: Icon(Icons.delete, color: Colors.white, size: ResponsiveUtils.getIconSize(context, 18)),
+                  label: Text(
+                    'Delete',
+                    style: TextStyle(color: Colors.white, fontSize: ResponsiveUtils.getFontSize(context, 14)),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFDC3545),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: ResponsiveUtils.getSpacing(context, 14)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: ResponsiveUtils.getSpacing(context, 12)),
+        ],
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => Get.back(),
+            icon: Icon(Icons.close, size: ResponsiveUtils.getIconSize(context, 18)),
+            label: Text('Close', style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 14))),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF6C757D),
+              side: const BorderSide(color: Color(0xFF6C757D)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
+              ),
+              padding: EdgeInsets.symmetric(vertical: ResponsiveUtils.getSpacing(context, 14)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
     Get.back(); // Close the detail dialog first
     Get.dialog(
       AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 16)),
+        ),
         title: Row(
           children: [
-            Icon(Icons.warning, color: Colors.orange[600]),
-            const SizedBox(width: 8),
-            const Text(
-              'Confirm Delete',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Icon(Icons.warning, color: Colors.orange[600], size: ResponsiveUtils.getIconSize(context, 24)),
+            SizedBox(width: ResponsiveUtils.getSpacing(context, 8)),
+            Expanded(
+              child: Text(
+                'Confirm Delete',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: ResponsiveUtils.getFontSize(context, 18),
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -366,13 +496,16 @@ class ProductDetailDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Are you sure you want to delete this product?'),
-            const SizedBox(height: 12),
+            Text(
+              'Are you sure you want to delete this product?',
+              style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 14)),
+            ),
+            SizedBox(height: ResponsiveUtils.getSpacing(context, 12)),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 12)),
               decoration: BoxDecoration(
                 color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 8)),
                 border: Border.all(color: Colors.red.shade200),
               ),
               child: Column(
@@ -380,19 +513,31 @@ class ProductDetailDialog extends StatelessWidget {
                 children: [
                   Text(
                     'Product: ${_safeString(product.partNumber)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: ResponsiveUtils.getFontSize(context, 14),
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  Text('Description: ${_safeString(product.description)}'),
-                  Text('Quantity: ${_safeString(product.quantity)}'),
+                  Text(
+                    'Description: ${_safeString(product.description)}',
+                    style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 12)),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'Quantity: ${_safeString(product.quantity)}',
+                    style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 12)),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: ResponsiveUtils.getSpacing(context, 8)),
+            Text(
               'This action cannot be undone.',
               style: TextStyle(
                 color: Colors.red,
                 fontWeight: FontWeight.w500,
+                fontSize: ResponsiveUtils.getFontSize(context, 12),
               ),
             ),
           ],
@@ -400,9 +545,12 @@ class ProductDetailDialog extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(color: Color(0xFF6C757D)),
+              style: TextStyle(
+                color: const Color(0xFF6C757D),
+                fontSize: ResponsiveUtils.getFontSize(context, 14),
+              ),
             ),
           ),
           ElevatedButton(
@@ -413,12 +561,15 @@ class ProductDetailDialog extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFDC3545),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 8)),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Delete',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: ResponsiveUtils.getFontSize(context, 14),
+              ),
             ),
           ),
         ],

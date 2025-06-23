@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inventro/app/utils/responsive_utils.dart';
 import '../../controller/auth_controller.dart';
 import '../../controller/dashboard_controller.dart';
 import 'widgets/unified_dashboard_card.dart';
@@ -35,29 +36,36 @@ class ManagerDashboard extends StatelessWidget {
             ),
           ),
           child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Unified Header and Welcome Card
-                  UnifiedDashboardCard(authController: authController),
-                  const SizedBox(height: 24),
-                  
-                  // Quick Actions
-                  const DashboardActions(),
-                  const SizedBox(height: 24),
-                  
-                  // Statistics Cards
-                  DashboardStatCards(dashboardController: dashboardController),
-                  const SizedBox(height: 24),
-                  
-                  // Inventory Section
-                  ProductGrid(dashboardController: dashboardController),
-                  
-                  const SizedBox(height: 32),
-                ],
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveUtils.getPadding(context),
+                    vertical: ResponsiveUtils.getSpacing(context, 24),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Unified Header and Welcome Card
+                      UnifiedDashboardCard(authController: authController),
+                      SizedBox(height: ResponsiveUtils.getSpacing(context, 24)),
+                      
+                      // Quick Actions
+                      const DashboardActions(),
+                      SizedBox(height: ResponsiveUtils.getSpacing(context, 24)),
+                      
+                      // Statistics Cards
+                      DashboardStatCards(dashboardController: dashboardController),
+                      SizedBox(height: ResponsiveUtils.getSpacing(context, 24)),
+                      
+                      // Inventory Section
+                      ProductGrid(dashboardController: dashboardController),
+                      
+                      SizedBox(height: ResponsiveUtils.getSpacing(context, 32)),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),
