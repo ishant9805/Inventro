@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/routes/app_routes.dart';
 import 'package:inventro/app/utils/responsive_utils.dart';
+import 'package:inventro/app/utils/safe_navigation.dart';
 
 class DashboardActions extends StatelessWidget {
   const DashboardActions({super.key});
@@ -97,7 +98,10 @@ class DashboardActions extends StatelessWidget {
             Expanded(
               child: _buildOutlinedButton(
                 context: context,
-                onPressed: () => Get.snackbar('Coming Soon', 'Assign Task feature coming soon!'),
+                onPressed: () => SafeNavigation.safeSnackbar(
+                  title: 'Coming Soon', 
+                  message: 'Assign Task feature coming soon!'
+                ),
                 icon: Icons.assignment,
                 label: 'Assign Task',
               ),
@@ -137,7 +141,10 @@ class DashboardActions extends StatelessWidget {
         SizedBox(height: ResponsiveUtils.getSpacing(context, 12)),
         _buildOutlinedButton(
           context: context,
-          onPressed: () => Get.snackbar('Coming Soon', 'Assign Task feature coming soon!'),
+          onPressed: () => SafeNavigation.safeSnackbar(
+            title: 'Coming Soon', 
+            message: 'Assign Task feature coming soon!'
+          ),
           icon: Icons.assignment,
           label: 'Assign Task',
         ),

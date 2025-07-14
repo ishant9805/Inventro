@@ -316,16 +316,20 @@ class ProductService {
       final endpoint = path.join(baseUrl, 'products', productId.toString());
       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
 
-      // Transform data to match backend schema
+      // Log the incoming data for debugging
+      print('🔄 ProductService: Updating product $productId with data: $productData');
+
+      // Transform data to match backend schema - FIX: Use the date as-is since it's already formatted
       final transformedData = {
         "part_number": productData['part_number'],
         "description": productData['description'],
         "location": productData['location'],
         "quantity": productData['quantity'],
-        "batch_number":
-            int.tryParse(productData['batch_number'].toString()) ?? 0,
-        "expiry_date": _formatDateForBackend(productData['expiry_date']),
+        "batch_number": productData['batch_number'], // Keep as received
+        "expiry_date": productData['expiry_date'], // Use the already formatted date
       };
+
+      print('🔄 ProductService: Transformed data for backend: $transformedData');
 
       final authHeaders = getAuthHeaders();
       final requestHeaders = {
@@ -336,7 +340,7 @@ class ProductService {
       final response = await http
           .put(
             uri,
-            headers: requestHeaders, // Use updated headers
+            headers: requestHeaders,
             body: jsonEncode(transformedData),
           )
           .timeout(
@@ -348,6 +352,9 @@ class ProductService {
             },
           );
 
+      print('📊 ProductService: Update response status: ${response.statusCode}');
+      print('📝 ProductService: Update response body: ${response.body}');
+
       if (response.statusCode == 200) {
         final responseData = _safeJsonDecode(
           response.body,
@@ -358,9 +365,11 @@ class ProductService {
             responseData['message'] ?? 'Failed to update product',
           );
         }
+        print('✅ ProductService: Product updated successfully');
         return responseData;
       } else {
         final errorData = _safeJsonDecode(response.body, response.statusCode);
+        print('❌ ProductService: Update failed with error: $errorData');
         throw Exception(
           errorData['message'] ??
               errorData['detail'] ??

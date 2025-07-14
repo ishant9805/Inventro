@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/data/services/company_service.dart';
 import 'package:inventro/app/routes/app_routes.dart';
+import 'package:inventro/app/utils/safe_navigation.dart';
 
 class CreateCompanyScreen extends StatefulWidget {
   const CreateCompanyScreen({super.key});
@@ -96,7 +97,7 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
                   child: Row(
                     children: [
                       GestureDetector(
-                        onTap: () => Get.back(),
+                        onTap: () => SafeNavigation.safeBack(),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(

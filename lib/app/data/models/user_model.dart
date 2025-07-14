@@ -1,5 +1,5 @@
 class CompanyModel {
-  final int id;
+  final String id;
   final String name;
   final int size;
   final String? createdAt;
@@ -15,7 +15,7 @@ class CompanyModel {
 
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
     return CompanyModel(
-      id: json['id'],
+      id: json['id']?.toString() ?? '', // Ensure it's always a string
       name: json['name'] ?? '',
       size: json['size'] ?? 0,
       createdAt: json['created_at'],
@@ -34,7 +34,7 @@ class UserModel {
   final String? companyName;
   final int? companySize;
   final int? id;
-  final int? companyId;
+  final String? companyId; // Changed from int? to String?
   final CompanyModel? company;
 
   UserModel({
@@ -62,7 +62,7 @@ class UserModel {
       profilePicture: json['profile_picture'],
       companyName: json['company_name'],
       companySize: json['company_size'],
-      companyId: json['company_id'],
+      companyId: json['company_id']?.toString(), // Ensure string conversion
       company: json['company'] != null ? CompanyModel.fromJson(json['company']) : null,
     );
   }

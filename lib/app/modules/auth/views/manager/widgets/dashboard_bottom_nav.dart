@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/routes/app_routes.dart';
+import 'package:inventro/app/utils/safe_navigation.dart';
 
 class DashboardBottomNav extends StatelessWidget {
   const DashboardBottomNav({super.key});
@@ -159,7 +160,7 @@ class DashboardBottomNav extends StatelessWidget {
                         label: 'Add Product',
                         color: const Color(0xFF28A745),
                         onTap: () {
-                          Get.back();
+                          SafeNavigation.safeBack();
                           Get.toNamed(AppRoutes.addProduct);
                         },
                       ),
@@ -171,7 +172,7 @@ class DashboardBottomNav extends StatelessWidget {
                         label: 'Add Employee',
                         color: const Color(0xFF495057),
                         onTap: () {
-                          Get.back();
+                          SafeNavigation.safeBack();
                           Get.toNamed(AppRoutes.addEmployee);
                         },
                       ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/modules/auth/controller/dashboard_controller.dart';
+import 'package:inventro/app/routes/app_routes.dart';
 import 'package:inventro/app/utils/responsive_utils.dart';
+import 'package:inventro/app/utils/safe_navigation.dart';
 
 class ProductDetailDialog extends StatelessWidget {
   final dynamic product;
@@ -164,7 +166,7 @@ class ProductDetailDialog extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () => Get.back(),
+            onPressed: () => SafeNavigation.safeBack(),
             icon: Icon(
               Icons.close, 
               color: Colors.white,
@@ -349,7 +351,7 @@ class ProductDetailDialog extends StatelessWidget {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () => Get.back(),
+            onPressed: () => SafeNavigation.safeBack(),
             icon: Icon(Icons.close, size: ResponsiveUtils.getIconSize(context, 18)),
             label: Text('Close', style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 14))),
             style: OutlinedButton.styleFrom(
@@ -452,7 +454,7 @@ class ProductDetailDialog extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
-            onPressed: () => Get.back(),
+            onPressed: () => SafeNavigation.safeBack(),
             icon: Icon(Icons.close, size: ResponsiveUtils.getIconSize(context, 18)),
             label: Text('Close', style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 14))),
             style: OutlinedButton.styleFrom(
@@ -470,117 +472,149 @@ class ProductDetailDialog extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context) {
-    Get.back(); // Close the detail dialog first
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 16)),
-        ),
-        title: Row(
-          children: [
-            Icon(Icons.warning, color: Colors.orange[600], size: ResponsiveUtils.getIconSize(context, 24)),
-            SizedBox(width: ResponsiveUtils.getSpacing(context, 8)),
-            Expanded(
-              child: Text(
-                'Confirm Delete',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: ResponsiveUtils.getFontSize(context, 18),
+    // Store product data before closing dialog
+    final productData = product;
+    final productId = product.id;
+    
+    // Close the detail dialog first
+    Get.back();
+    
+    // Use a delay to ensure the dialog is fully closed before showing confirmation
+    Future.delayed(const Duration(milliseconds: 200), () {
+      Get.dialog(
+        AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 16)),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.warning, color: Colors.orange[600], size: ResponsiveUtils.getIconSize(context, 24)),
+              SizedBox(width: ResponsiveUtils.getSpacing(context, 8)),
+              Expanded(
+                child: Text(
+                  'Confirm Delete',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: ResponsiveUtils.getFontSize(context, 18),
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Are you sure you want to delete this product?',
-              style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 14)),
-            ),
-            SizedBox(height: ResponsiveUtils.getSpacing(context, 12)),
-            Container(
-              padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 12)),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 8)),
-                border: Border.all(color: Colors.red.shade200),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to delete this product?',
+                style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 14)),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Product: ${_safeString(product.partNumber)}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: ResponsiveUtils.getFontSize(context, 14),
+              SizedBox(height: ResponsiveUtils.getSpacing(context, 12)),
+              Container(
+                padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 12)),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 8)),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Product: ${_safeString(productData.partNumber)}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: ResponsiveUtils.getFontSize(context, 14),
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    'Description: ${_safeString(product.description)}',
-                    style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 12)),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    'Quantity: ${_safeString(product.quantity)}',
-                    style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 12)),
-                  ),
-                ],
+                    Text(
+                      'Description: ${_safeString(productData.description)}',
+                      style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 12)),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'Quantity: ${_safeString(productData.quantity)}',
+                      style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 12)),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: ResponsiveUtils.getSpacing(context, 8)),
+              Text(
+                'This action cannot be undone.',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.w500,
+                  fontSize: ResponsiveUtils.getFontSize(context, 12),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: const Color(0xFF6C757D),
+                  fontSize: ResponsiveUtils.getFontSize(context, 14),
+                ),
               ),
             ),
-            SizedBox(height: ResponsiveUtils.getSpacing(context, 8)),
-            Text(
-              'This action cannot be undone.',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.w500,
-                fontSize: ResponsiveUtils.getFontSize(context, 12),
+            ElevatedButton(
+              onPressed: () {
+                Get.back(); // Close confirmation dialog
+                controller.deleteProduct(productId); // Perform deletion
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFDC3545),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 8)),
+                ),
+              ),
+              child: Text(
+                'Delete',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: ResponsiveUtils.getFontSize(context, 14),
+                ),
               ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: const Color(0xFF6C757D),
-                fontSize: ResponsiveUtils.getFontSize(context, 14),
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              controller.deleteProduct(product.id);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFDC3545),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 8)),
-              ),
-            ),
-            child: Text(
-              'Delete',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: ResponsiveUtils.getFontSize(context, 14),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+        barrierDismissible: false, // Prevent accidental dismissal
+      );
+    });
   }
 
   void _navigateToEdit() {
-    Get.back(); // Close the dialog first
-    // Navigate to the edit page with product data
-    Get.toNamed('/edit-product', arguments: product);
+    // Check if context is still valid before navigation
+    if (!Get.isDialogOpen!) return;
+    
+    // Store the product data before closing dialog
+    final productData = product;
+    
+    // Close the dialog first with a longer delay to ensure cleanup
+    Get.back();
+    
+    // Use a longer delay to ensure the dialog is fully closed and navigation stack is stable
+    Future.delayed(const Duration(milliseconds: 300), () {
+      try {
+        // Navigate to the edit page with product data using proper route
+        Get.toNamed(AppRoutes.editProduct, arguments: productData);
+        print('✅ Navigating to edit product with data: ${productData.partNumber}');
+      } catch (e) {
+        print('❌ Error navigating to edit product: $e');
+        SafeNavigation.safeSnackbar(
+          title: 'Navigation Error',
+          message: 'Failed to open edit screen. Please try again.',
+          backgroundColor: Colors.red.withOpacity(0.1),
+          colorText: Colors.red[800],
+        );
+      }
+    });
   }
 
   // Helper method to safely convert any value to string

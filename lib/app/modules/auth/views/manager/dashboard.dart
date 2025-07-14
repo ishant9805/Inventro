@@ -9,13 +9,23 @@ import 'widgets/dashboard_actions.dart';
 import 'widgets/dashboard_stat_cards.dart';
 import 'widgets/product_grid.dart';
 
-class ManagerDashboard extends StatelessWidget {
+class ManagerDashboard extends StatefulWidget {
   const ManagerDashboard({super.key});
 
   @override
+  State<ManagerDashboard> createState() => _ManagerDashboardState();
+}
+
+class _ManagerDashboardState extends State<ManagerDashboard> {
+  @override
   Widget build(BuildContext context) {
     final AuthController authController = Get.find<AuthController>();
-    final DashboardController dashboardController = Get.put(DashboardController());
+    final DashboardController dashboardController = Get.find<DashboardController>();
+    
+    // Check and reinitialize when returning to dashboard
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      dashboardController.checkAndReinitialize();
+    });
     
     // Modern gradient matching other screens
     const List<Color> gradientColors = [
@@ -60,7 +70,6 @@ class ManagerDashboard extends StatelessWidget {
                       
                       // Inventory Section
                       ProductGrid(dashboardController: dashboardController),
-                      
                       SizedBox(height: ResponsiveUtils.getSpacing(context, 32)),
                     ],
                   ),

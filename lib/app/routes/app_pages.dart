@@ -9,10 +9,10 @@ import 'package:inventro/app/modules/auth/views/manager/login_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/profile_screen.dart';
 import 'package:inventro/app/modules/auth/views/role_selection_screen.dart';
 import 'package:inventro/app/modules/auth/views/splash_screen.dart';
-// import '../modules/auth/views/manager/register_screen.dart';
 import '../modules/auth/views/manager/company_creation_page.dart';
 import '../modules/auth/views/manager/create_company_screen.dart';
 import '../modules/auth/views/manager/manager_registration_screen.dart';
+import '../modules/auth/bindings/edit_product_binding.dart';
 
 import 'app_routes.dart';
 
@@ -32,10 +32,6 @@ class AppPages {
       name: AppRoutes.login,
       page: () => LoginScreen(),
     ),
-    // GetPage(
-    //   name: AppRoutes.register,
-    //   page: () => RegisterScreen(),
-    // ),
     GetPage(
       name: AppRoutes.dashboard,
       page: () => ManagerDashboard(),
@@ -51,6 +47,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.editProduct,
       page: () => EditProductScreen(),
+      binding: EditProductBinding(), // Add proper binding for controller management
     ),
     GetPage(
       name: AppRoutes.managerProfile,
@@ -68,10 +65,6 @@ class AppPages {
       name: AppRoutes.companyCreation,
       page: () => CompanyCreationPage(),
     ),
-    // GetPage(
-    //   name: AppRoutes.registerManager,
-    //   page: () => RegisterScreen(),
-    // ),
     GetPage(
       name: AppRoutes.createCompanyScreen,
       page: () => const CreateCompanyScreen(),

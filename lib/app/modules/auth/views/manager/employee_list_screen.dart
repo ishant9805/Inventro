@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/routes/app_routes.dart';
+import 'package:inventro/app/utils/safe_navigation.dart';
 import '../../controller/employee_list_controller.dart';
 import 'widgets/employee_tile.dart';
 
@@ -41,7 +42,7 @@ class EmployeeListScreen extends StatelessWidget {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF4A00E0)),
-        onPressed: () => Get.back(),
+        onPressed: () => SafeNavigation.safeBack(),
         tooltip: "Back to Dashboard",
       ),
       title: const Text(

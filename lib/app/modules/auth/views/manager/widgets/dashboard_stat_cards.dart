@@ -85,7 +85,7 @@ class DashboardStatCards extends StatelessWidget {
             title: 'Expiring Soon',
             value: '${dashboardController.expiringProducts.length}',
             icon: Icons.schedule,
-            color: Colors.orange,
+            color: Colors.yellow,
           ),
         ),
       ],

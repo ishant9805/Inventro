@@ -101,25 +101,32 @@ class ProductGrid extends StatelessWidget {
   }
 
   Widget _buildProductCounter(BuildContext context) {
-    return Obx(() => Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: ResponsiveUtils.getPadding(context, factor: 0.02),
-        vertical: ResponsiveUtils.getSpacing(context, 4),
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFF4A00E0).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
-        border: Border.all(color: const Color(0xFF4A00E0).withOpacity(0.3)),
-      ),
-      child: Text(
-        '${dashboardController.products.length} total • ${dashboardController.filteredProducts.length} shown',
-        style: TextStyle(
-          fontSize: ResponsiveUtils.getFontSize(context, 12),
-          color: const Color(0xFF4A00E0),
-          fontWeight: FontWeight.w600,
+    return Obx(() {
+      // Only show counter when initialized to avoid showing incorrect counts
+      if (!dashboardController.isInitialized.value) {
+        return const SizedBox.shrink();
+      }
+      
+      return Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: ResponsiveUtils.getPadding(context, factor: 0.02),
+          vertical: ResponsiveUtils.getSpacing(context, 4),
         ),
-      ),
-    ));
+        decoration: BoxDecoration(
+          color: const Color(0xFF4A00E0).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
+          border: Border.all(color: const Color(0xFF4A00E0).withOpacity(0.3)),
+        ),
+        child: Text(
+          '${dashboardController.products.length} total • ${dashboardController.filteredProducts.length} shown',
+          style: TextStyle(
+            fontSize: ResponsiveUtils.getFontSize(context, 12),
+            color: const Color(0xFF4A00E0),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buildRefreshButton(BuildContext context) {
@@ -162,101 +169,167 @@ class ProductGrid extends StatelessWidget {
   }
 
   Widget _buildSearchBar(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: ResponsiveUtils.getSpacing(context, 8),
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: dashboardController.searchController,
-        decoration: InputDecoration(
-          hintText: ResponsiveUtils.isSmallScreen(context) 
-            ? 'Search products...'
-            : 'Search products by part number, description, location...',
-          hintStyle: TextStyle(
-            color: Colors.grey[400], 
-            fontSize: ResponsiveUtils.getFontSize(context, 14),
-          ),
-          prefixIcon: Icon(
-            Icons.search,
-            color: const Color(0xFF4A00E0),
-            size: ResponsiveUtils.getIconSize(context, 20),
-          ),
-          suffixIcon: Obx(() => dashboardController.searchQuery.value.isNotEmpty
-              ? IconButton(
-                  icon: Icon(
-                    Icons.clear, 
-                    color: Colors.grey[400], 
-                    size: ResponsiveUtils.getIconSize(context, 20),
-                  ),
-                  onPressed: dashboardController.clearSearch,
-                )
-              : const SizedBox.shrink()),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: ResponsiveUtils.getPadding(context, factor: 0.04),
-            vertical: ResponsiveUtils.getSpacing(context, 12),
-          ),
+    return Obx(() {
+      // Only show search bar when initialized and has products
+      if (!dashboardController.isInitialized.value) {
+        return const SizedBox.shrink();
+      }
+      
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: ResponsiveUtils.getSpacing(context, 8),
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 14)),
-      ),
-    );
+        child: TextField(
+          controller: dashboardController.searchController,
+          decoration: InputDecoration(
+            hintText: ResponsiveUtils.isSmallScreen(context) 
+              ? 'Search products...'
+              : 'Search products by part number, description, location...',
+            hintStyle: TextStyle(
+              color: Colors.grey[400], 
+              fontSize: ResponsiveUtils.getFontSize(context, 14),
+            ),
+            prefixIcon: Icon(
+              Icons.search,
+              color: const Color(0xFF4A00E0),
+              size: ResponsiveUtils.getIconSize(context, 20),
+            ),
+            suffixIcon: Obx(() => dashboardController.searchQuery.value.isNotEmpty
+                ? IconButton(
+                    icon: Icon(
+                      Icons.clear, 
+                      color: Colors.grey[400], 
+                      size: ResponsiveUtils.getIconSize(context, 20),
+                    ),
+                    onPressed: dashboardController.clearSearch,
+                  )
+                : const SizedBox.shrink()),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
+              borderSide: BorderSide.none,
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: ResponsiveUtils.getPadding(context, factor: 0.04),
+              vertical: ResponsiveUtils.getSpacing(context, 12),
+            ),
+          ),
+          style: TextStyle(fontSize: ResponsiveUtils.getFontSize(context, 14)),
+        ),
+      );
+    });
   }
 
   Widget _buildProductList(BuildContext context) {
     return Obx(() {
-      // Show loading spinner for initial load
-      if (dashboardController.isLoading.value && dashboardController.products.isEmpty) {
+      // Show loading spinner for initial load when not initialized
+      if (!dashboardController.isInitialized.value) {
         return Container(
           padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 40)),
           child: const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A00E0)),
+            child: Column(
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A00E0)),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Initializing dashboard...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF6B7280),
+                  ),
+                ),
+              ],
             ),
           ),
         );
       }
       
-      // Show error state with retry option
-      if (dashboardController.hasError.value && dashboardController.products.isEmpty) {
-        return _buildErrorState(context);
+      // Show loading overlay for refresh operations
+      if (dashboardController.isLoading.value && dashboardController.products.isNotEmpty) {
+        return Stack(
+          children: [
+            _buildProductContent(context),
+            Container(
+              padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 20)),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4A00E0)),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text('Refreshing...'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
       }
       
-      // Show empty state when no products but no error
-      if (dashboardController.products.isEmpty) {
-        return _buildEmptyState(context);
-      }
-
-      // Show no search results state
-      if (dashboardController.filteredProducts.isEmpty && dashboardController.searchQuery.value.isNotEmpty) {
-        return _buildNoResultsState(context);
-      }
-      
-      // Show filtered products list with responsive layout
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          if (ResponsiveUtils.isLargeScreen(context) && constraints.maxWidth > 600) {
-            // Use grid layout for larger screens
-            return _buildGridView(context);
-          } else {
-            // Use list layout for smaller screens
-            return _buildListView(context);
-          }
-        },
-      );
+      return _buildProductContent(context);
     });
+  }
+
+  Widget _buildProductContent(BuildContext context) {
+    // Show error state with retry option
+    if (dashboardController.hasError.value && dashboardController.products.isEmpty) {
+      return _buildErrorState(context);
+    }
+    
+    // Show empty state when no products but no error
+    if (dashboardController.products.isEmpty) {
+      return _buildEmptyState(context);
+    }
+
+    // Show no search results state
+    if (dashboardController.filteredProducts.isEmpty && dashboardController.searchQuery.value.isNotEmpty) {
+      return _buildNoResultsState(context);
+    }
+    
+    // Show filtered products list with responsive layout
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (ResponsiveUtils.isLargeScreen(context) && constraints.maxWidth > 600) {
+          // Use grid layout for larger screens
+          return _buildGridView(context);
+        } else {
+          // Use list layout for smaller screens
+          return _buildListView(context);
+        }
+      },
+    );
   }
 
   Widget _buildListView(BuildContext context) {
@@ -290,20 +363,29 @@ class ProductGrid extends StatelessWidget {
   }
 
   Widget _buildProductCard(BuildContext context, dynamic product, int index, {bool isGrid = false}) {
-    final isExpired = product.isExpired;
-    final isExpiringSoon = product.daysUntilExpiry <= 30 && !isExpired;
+    // Safely get product properties with null checks
+    bool isExpired = false;
+    bool isExpiringSoon = false;
+    Color statusColor = const Color(0xFF6C757D);
     
-    final now = DateTime.now();
-    final expiry = DateTime.tryParse(product.expiryDate);
-    Color statusColor;
-    if (expiry == null) {
-      statusColor = const Color(0xFF6C757D);
-    } else if (product.isExpired) {
-      statusColor = const Color(0xFFDC3545);
-    } else if (expiry.difference(now).inDays <= 7) {
-      statusColor = const Color(0xFFFFC107);
-    } else {
-      statusColor = const Color(0xFF28A745);
+    try {
+      isExpired = product?.isExpired ?? false;
+      final daysUntilExpiry = product?.daysUntilExpiry ?? 999;
+      isExpiringSoon = daysUntilExpiry <= 30 && !isExpired;
+      
+      // Determine status color based on expiry
+      if (isExpired) {
+        statusColor = const Color(0xFFDC3545);
+      } else if (daysUntilExpiry <= 7) {
+        statusColor = const Color(0xFFFFC107);
+      } else if (daysUntilExpiry <= 30) {
+        statusColor = const Color(0xFFFF9800);
+      } else {
+        statusColor = const Color(0xFF28A745);
+      }
+    } catch (e) {
+      print('⚠️ Error processing product status: $e');
+      // Fallback values are already set above
     }
     
     return Container(
@@ -341,6 +423,11 @@ class ProductGrid extends StatelessWidget {
   }
 
   Widget _buildProductHeader(BuildContext context, dynamic product, Color statusColor, bool isGrid) {
+    // Safely get product properties
+    final partNumber = product?.partNumber?.toString() ?? 'Unknown';
+    final description = product?.description?.toString() ?? 'No description';
+    final quantity = product?.quantity?.toString() ?? '0';
+    
     return Row(
       children: [
         Container(
@@ -352,8 +439,8 @@ class ProductGrid extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              product.partNumber.isNotEmpty 
-                ? product.partNumber.substring(0, 1).toUpperCase()
+              partNumber.isNotEmpty 
+                ? partNumber.substring(0, 1).toUpperCase()
                 : 'P',
               style: TextStyle(
                 color: statusColor,
@@ -369,7 +456,7 @@ class ProductGrid extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                product.partNumber,
+                partNumber,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: ResponsiveUtils.getFontSize(context, isGrid ? 14 : 18),
@@ -380,7 +467,7 @@ class ProductGrid extends StatelessWidget {
               ),
               SizedBox(height: ResponsiveUtils.getSpacing(context, 4)),
               Text(
-                product.description,
+                description,
                 style: TextStyle(
                   color: const Color(0xFF6C757D), 
                   fontSize: ResponsiveUtils.getFontSize(context, isGrid ? 12 : 14),
@@ -402,7 +489,7 @@ class ProductGrid extends StatelessWidget {
             border: Border.all(color: const Color(0xFF2196F3)),
           ),
           child: Text(
-            'Qty: ${product.quantity}',
+            'Qty: $quantity',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: const Color(0xFF2196F3),
@@ -415,6 +502,10 @@ class ProductGrid extends StatelessWidget {
   }
 
   Widget _buildProductDetails(BuildContext context, dynamic product) {
+    // Safely get product properties
+    final location = product?.location?.toString() ?? 'Unknown location';
+    final formattedExpiryDate = product?.formattedExpiryDate?.toString() ?? 'No date';
+    
     return Container(
       padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 12)),
       decoration: BoxDecoration(
@@ -433,7 +524,7 @@ class ProductGrid extends StatelessWidget {
               SizedBox(width: ResponsiveUtils.getSpacing(context, 4)),
               Flexible(
                 child: Text(
-                  'Location: ${product.location}',
+                  'Location: $location',
                   style: TextStyle(
                     color: Colors.grey[600], 
                     fontSize: ResponsiveUtils.getFontSize(context, 12),
@@ -454,7 +545,7 @@ class ProductGrid extends StatelessWidget {
               SizedBox(width: ResponsiveUtils.getSpacing(context, 4)),
               Flexible(
                 child: Text(
-                  'Expires: ${product.formattedExpiryDate}',
+                  'Expires: $formattedExpiryDate',
                   style: TextStyle(
                     color: Colors.grey[600], 
                     fontSize: ResponsiveUtils.getFontSize(context, 12),
@@ -470,6 +561,8 @@ class ProductGrid extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(BuildContext context, dynamic product, Color statusColor, bool isExpired) {
+    final daysUntilExpiry = product?.daysUntilExpiry ?? 999;
+    
     return Container(
       padding: EdgeInsets.symmetric(
         vertical: ResponsiveUtils.getSpacing(context, 8),
@@ -493,7 +586,7 @@ class ProductGrid extends StatelessWidget {
             child: Text(
               isExpired 
                 ? 'EXPIRED'
-                : 'Expires in ${product.daysUntilExpiry} days',
+                : 'Expires in $daysUntilExpiry days',
               style: TextStyle(
                 color: statusColor,
                 fontWeight: FontWeight.bold,
@@ -681,11 +774,24 @@ class ProductGrid extends StatelessWidget {
   }
 
   void _showProductDetails(BuildContext context, product) {
-    Get.dialog(
-      ProductDetailDialog(
-        product: product,
-        controller: dashboardController,
-      ),
-    );
+    try {
+      if (product != null) {
+        Get.dialog(
+          ProductDetailDialog(
+            product: product,
+            controller: dashboardController,
+          ),
+        );
+      }
+    } catch (e) {
+      print('⚠️ Error showing product details: $e');
+      Get.snackbar(
+        'Error',
+        'Unable to show product details',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withValues(alpha: 0.1),
+        colorText: Colors.red[800],
+      );
+    }
   }
 }

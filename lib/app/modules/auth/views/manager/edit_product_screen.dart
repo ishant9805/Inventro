@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:inventro/app/routes/app_routes.dart';
+import 'package:inventro/app/utils/safe_navigation.dart';
 import '../../controller/edit_product_controller.dart';
 import 'widgets/edit_product_header.dart';
 import 'widgets/edit_product_form.dart';
@@ -8,10 +8,11 @@ import 'widgets/edit_product_form.dart';
 class EditProductScreen extends StatelessWidget {
   EditProductScreen({super.key});
 
-  final EditProductController controller = Get.put(EditProductController());
-
   @override
   Widget build(BuildContext context) {
+    // Get the controller from GetX dependency injection (managed by binding)
+    final controller = Get.find<EditProductController>();
+    
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -50,7 +51,7 @@ class EditProductScreen extends StatelessWidget {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF4A00E0)),
-        onPressed: () => Get.offAllNamed(AppRoutes.dashboard),
+        onPressed: () => SafeNavigation.safeBack(),
         tooltip: "Back to Dashboard",
       ),
       title: const Text(

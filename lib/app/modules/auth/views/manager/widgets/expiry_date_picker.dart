@@ -17,9 +17,21 @@ class _ExpiryDatePickerState extends State<ExpiryDatePicker> {
   void initState() {
     super.initState();
     // Listen to controller changes to rebuild the widget
-    widget.controller.addListener(() {
+    widget.controller.addListener(_onControllerChanged);
+  }
+
+  @override
+  void dispose() {
+    // Remove listener to prevent memory leaks
+    widget.controller.removeListener(_onControllerChanged);
+    super.dispose();
+  }
+
+  void _onControllerChanged() {
+    // Only setState if the widget is still mounted
+    if (mounted) {
       setState(() {});
-    });
+    }
   }
 
   @override
@@ -63,14 +75,26 @@ class _ExpiryDatePickerState extends State<ExpiryDatePicker> {
                       fontWeight: FontWeight.w500,
                       color: widget.controller.text.isEmpty
                           ? Colors.grey[400]
-                          : const Color(0xFF1A202C),
+                          : const Color(0xFF374151),
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.arrow_drop_down,
-                  color: Colors.grey[400],
-                ),
+                if (widget.controller.text.isNotEmpty)
+                  GestureDetector(
+                    onTap: _clearDate,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.clear,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -80,9 +104,31 @@ class _ExpiryDatePickerState extends State<ExpiryDatePicker> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    // Check if widget is still mounted before proceeding
+    if (!mounted) return;
+
+    DateTime initialDate = DateTime.now();
+
+    // Try to parse existing date if available
+    if (widget.controller.text.isNotEmpty) {
+      try {
+        final parts = widget.controller.text.split('/');
+        if (parts.length == 3) {
+          initialDate = DateTime(
+            int.parse(parts[2]), // year
+            int.parse(parts[1]), // month
+            int.parse(parts[0]), // day
+          );
+        }
+      } catch (e) {
+        print('Error parsing existing date: $e');
+        initialDate = DateTime.now();
+      }
+    }
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().add(const Duration(days: 30)),
+      initialDate: initialDate,
       firstDate: DateTime.now(),
       lastDate: DateTime(2030),
       builder: (context, child) {
@@ -92,17 +138,24 @@ class _ExpiryDatePickerState extends State<ExpiryDatePicker> {
               primary: Color(0xFF4A00E0),
               onPrimary: Colors.white,
               surface: Colors.white,
-              onSurface: Color(0xFF1A202C),
+              onSurface: Colors.black,
             ),
           ),
           child: child!,
         );
       },
     );
-    
-    if (picked != null) {
-      widget.controller.text =
-          "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+
+    // Check if widget is still mounted and date was picked
+    if (mounted && picked != null) {
+      widget.controller.text = "${picked.day}/${picked.month}/${picked.year}";
     }
+  }
+
+  void _clearDate() {
+    // Check if widget is still mounted before clearing
+    if (!mounted) return;
+
+    widget.controller.clear();
   }
 }

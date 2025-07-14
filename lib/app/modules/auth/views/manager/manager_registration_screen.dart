@@ -225,7 +225,7 @@ class _ManagerRegistrationScreenState extends State<ManagerRegistrationScreen> {
                                     borderRadius: BorderRadius.all(Radius.circular(16)),
                                   ),
                                 ),
-                                keyboardType: TextInputType.number,
+                                keyboardType: TextInputType.text,
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
                                     return 'Company ID is required';

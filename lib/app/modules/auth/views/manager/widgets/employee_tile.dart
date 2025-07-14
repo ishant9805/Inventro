@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/data/models/employee_model.dart';
 import 'package:inventro/app/modules/auth/controller/employee_list_controller.dart';
+import 'package:inventro/app/utils/safe_navigation.dart';
 
 class EmployeeTile extends StatelessWidget {
   final EmployeeModel employee;
@@ -236,9 +237,9 @@ class EmployeeTile extends StatelessWidget {
         _showEmployeeDetails();
         break;
       case 'edit':
-        Get.snackbar(
-          'Info', 
-          'Edit employee feature coming soon!',
+        SafeNavigation.safeSnackbar(
+          title: 'Info',
+          message: 'Edit employee feature coming soon!',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.blue.withOpacity(0.1),
           colorText: Colors.blue[800],

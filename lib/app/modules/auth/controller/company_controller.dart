@@ -14,6 +14,9 @@ class CompanyController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
 
+  // Add disposed flag
+  bool _isDisposed = false;
+
   // Fetch company by ID
   Future<void> fetchCompanyById() async {
     isLoading.value = true;
@@ -31,29 +34,35 @@ class CompanyController extends GetxController {
 
   // Create new company
   Future<void> createCompany() async {
+    if (_isDisposed) return;
+
     isLoading.value = true;
     error.value = '';
     final name = nameController.text.trim();
     final size = int.tryParse(sizeController.text.trim()) ?? 0;
     final result = await _companyService.createCompany(name: name, size: size);
-    if (result != null && result['id'] != null) {
+    if (result != null && result['id'] != null && !_isDisposed) {
       companyData.value = result;
       // Use WidgetsBinding to ensure navigation after build
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (Get.isRegistered<CompanyController>()) {
+        if (!_isDisposed && Get.isRegistered<CompanyController>()) {
           Get.toNamed(AppRoutes.register, arguments: {
             'companyId': result['id'].toString(),
             'companyData': result,
           });
         }
       });
-    } else {
+    } else if (!_isDisposed) {
       error.value = 'Failed to create company.';
     }
-    isLoading.value = false;
+    if (!_isDisposed) {
+      isLoading.value = false;
+    }
   }
 
   void clearFields() {
+    if (_isDisposed) return;
+
     companyIdController.clear();
     nameController.clear();
     sizeController.clear();
@@ -63,9 +72,17 @@ class CompanyController extends GetxController {
 
   @override
   void onClose() {
-    companyIdController.dispose();
-    nameController.dispose();
-    sizeController.dispose();
+    _isDisposed = true;
+
+    // Safely dispose controllers
+    try {
+      companyIdController.dispose();
+      nameController.dispose();
+      sizeController.dispose();
+    } catch (e) {
+      print('Error disposing company controllers: $e');
+    }
+
     super.onClose();
   }
 }

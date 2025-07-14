@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
+import 'package:inventro/app/utils/safe_navigation.dart';
 import '../../../data/services/auth_service.dart';
 
 class EmployeeLoginController extends GetxController {
@@ -15,7 +16,10 @@ class EmployeeLoginController extends GetxController {
     final pin = pinController.text.trim();
 
     if (email.isEmpty || pin.isEmpty) {
-      Get.snackbar('Error', 'Please fill all fields');
+      SafeNavigation.safeSnackbar(
+        title: 'Error', 
+        message: 'Please fill all fields'
+      );
       return;
     }
 
@@ -31,13 +35,22 @@ class EmployeeLoginController extends GetxController {
         final authController = Get.find<AuthController>();
         authController.user.value = userProfile;
         // Navigate to employee dashboard
-        Get.snackbar('Success', 'Login successful!');
+        SafeNavigation.safeSnackbar(
+          title: 'Success', 
+          message: 'Login successful!'
+        );
         Get.offAllNamed('/employee-dashboard');
       } else {
-        Get.snackbar('Login Failed', 'You are not registered as an employee.');
+        SafeNavigation.safeSnackbar(
+          title: 'Login Failed', 
+          message: 'You are not registered as an employee.'
+        );
       }
     } catch (e) {
-      Get.snackbar('Login Failed', e.toString());
+      SafeNavigation.safeSnackbar(
+        title: 'Login Failed', 
+        message: e.toString()
+      );
     } finally {
       isLoading.value = false;
     }

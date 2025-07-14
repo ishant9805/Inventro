@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/modules/auth/views/manager/company_details_screen.dart';
+import 'package:inventro/app/utils/safe_navigation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../../data/services/auth_service.dart';
@@ -8,6 +9,7 @@ import '../../../data/models/user_model.dart';
 import '../../../routes/app_routes.dart';
 import '../../../data/services/company_service.dart';
 import '../../../data/services/employee_service.dart';
+
 class AuthController extends GetxController {
   // Input fields for login and registration
   final nameController = TextEditingController();
@@ -26,7 +28,10 @@ class AuthController extends GetxController {
   // --- REGISTER MANAGER ---
   Future<void> registerManager({String? companyId}) async {
     if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
-      Get.snackbar("Error", "Passwords do not match");
+      SafeNavigation.safeSnackbar(
+        title: "Error", 
+        message: "Passwords do not match"
+      );
       return;
     }
 
@@ -43,20 +48,16 @@ class AuthController extends GetxController {
       };
 
       await _authService.registerAdmin(body);
-      Get.snackbar("Success", "Manager registered successfully");
+      SafeNavigation.safeSnackbar(
+        title: "Success", 
+        message: "Manager registered successfully"
+      );
 
       // Fetch company details and employee count if registering with existing company
       if (companyId != null) {
         final companyService = CompanyService();
         final companyData = await companyService.getCompanyById(companyId);
-        int employeeCount = 0;
-        if (companyData != null) {
-          try {
-            // Only fetch employees if company exists and manager is registered
-            // (Assume backend links manager to company on registration)
-            // You may want to fetch employees by companyId if your API supports it
-          } catch (_) {}
-        }
+        
         // Redirect to login after registration
         clearTextControllers();
         Get.offAllNamed(AppRoutes.login);
@@ -67,7 +68,10 @@ class AuthController extends GetxController {
       // Navigate to Login page
       Get.offAllNamed(AppRoutes.login);
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      SafeNavigation.safeSnackbar(
+        title: "Error", 
+        message: e.toString()
+      );
     } finally {
       isLoading.value = false;
     }
@@ -79,7 +83,10 @@ class AuthController extends GetxController {
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      Get.snackbar('Error', 'Please fill all fields');
+      SafeNavigation.safeSnackbar(
+        title: 'Error', 
+        message: 'Please fill all fields'
+      );
       return;
     }
 
@@ -91,12 +98,15 @@ class AuthController extends GetxController {
       
       // Step 2: Use the token to fetch complete user profile
       final userProfile = await _authService.fetchUserProfile(tokenResult.token);
-      
+
       // Step 3: Set the complete user profile in state
       user.value = userProfile;
       await saveUserToPrefs(userProfile);
 
-      Get.snackbar("Success", "Login successful!");
+      SafeNavigation.safeSnackbar(
+        title: "Success", 
+        message: "Login successful!"
+      );
 
       // Clear input fields
       emailController.clear();
@@ -106,7 +116,10 @@ class AuthController extends GetxController {
       Get.offAllNamed(AppRoutes.dashboard);
 
     } catch (e) {
-      Get.snackbar("Login Failed", e.toString());
+      SafeNavigation.safeSnackbar(
+        title: "Login Failed", 
+        message: e.toString()
+      );
     } finally {
       isLoading.value = false;
     }
@@ -119,16 +132,18 @@ class AuthController extends GetxController {
     clearUserPrefs();
     clearTextControllers();
     
-    // Show success message
-    Get.snackbar(
-      "Logout Successful", 
-      "You have been logged out successfully",
+    // Show success message using safe snackbar
+    SafeNavigation.safeSnackbar(
+      title: "Logout Successful", 
+      message: "You have been logged out successfully",
       snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2)
+      duration: const Duration(seconds: 2),
     );
     
-    // Navigate to role selection screen
-    Get.offAllNamed(AppRoutes.roleSelection);
+    // Navigate to role selection screen with delay to avoid conflicts
+    Future.delayed(const Duration(milliseconds: 200), () {
+      Get.offAllNamed(AppRoutes.roleSelection);
+    });
   }
 
   // --- Clear all TextControllers ---
@@ -153,6 +168,7 @@ class AuthController extends GetxController {
     if (user.companyName != null) await prefs.setString('user_company_name', user.companyName!);
     if (user.companySize != null) await prefs.setInt('user_company_size', user.companySize!);
     if (user.id != null) await prefs.setInt('user_id', user.id!);
+    if (user.companyId != null) await prefs.setString('user_company_id', user.companyId!); // Add this line
     if (user.company != null) await prefs.setString('user_company', jsonEncode({
       'id': user.company!.id,
       'name': user.company!.name,
@@ -182,6 +198,7 @@ class AuthController extends GetxController {
         companyName: prefs.getString('user_company_name'),
         companySize: prefs.getInt('user_company_size'),
         id: prefs.getInt('user_id'),
+        companyId: prefs.getString('user_company_id'), // Add this line
         company: company,
       );
     }
@@ -222,5 +239,5 @@ class AuthController extends GetxController {
   // --- Splash Screen Optimization Note ---
   // Avoid heavy initialization in splash screen. If you need to load data, do it asynchronously
   // and show a loading indicator. Keep splash screen logic lightweight.
+  
 }
-// This controller handles the authentication logic for the app, including login and registration.

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/data/services/company_service.dart';
+import 'package:inventro/app/utils/safe_navigation.dart';
 import '../../controller/auth_controller.dart';
 
 class ManagerProfileScreen extends StatefulWidget {
@@ -80,7 +81,7 @@ class _ManagerProfileScreenState extends State<ManagerProfileScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => Get.back(),
+            onTap: () => SafeNavigation.safeBack(),
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -581,7 +582,7 @@ class _ManagerProfileScreenState extends State<ManagerProfileScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => SafeNavigation.safeBack(),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         side: BorderSide(color: Colors.grey.shade300),
@@ -602,7 +603,7 @@ class _ManagerProfileScreenState extends State<ManagerProfileScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.back();
+                        SafeNavigation.safeBack();
                         authController.logout();
                       },
                       style: ElevatedButton.styleFrom(
