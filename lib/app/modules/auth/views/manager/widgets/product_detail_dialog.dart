@@ -670,7 +670,7 @@ class ProductDetailDialog extends StatelessWidget {
 
   Color _getStatusColor() {
     if (_isExpired()) return const Color(0xFFDC3545);
-    if (_getDaysUntilExpiry() <= 30) return const Color(0xFFFFC107);
+    if (_getDaysUntilExpiry() <= 2) return const Color(0xFFFFC107);
     return const Color(0xFF28A745);
   }
 

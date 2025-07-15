@@ -376,10 +376,8 @@ class ProductGrid extends StatelessWidget {
       // Determine status color based on expiry
       if (isExpired) {
         statusColor = const Color(0xFFDC3545);
-      } else if (daysUntilExpiry <= 7) {
+      } else if (daysUntilExpiry <= 2) {
         statusColor = const Color(0xFFFFC107);
-      } else if (daysUntilExpiry <= 30) {
-        statusColor = const Color(0xFFFF9800);
       } else {
         statusColor = const Color(0xFF28A745);
       }
