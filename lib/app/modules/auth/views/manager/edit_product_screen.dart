@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/utils/safe_navigation.dart';
 import '../../controller/edit_product_controller.dart';
-import 'widgets/edit_product_header.dart';
-import 'widgets/edit_product_form.dart';
+import 'widgets/product_widgets/edit_product_header.dart';
+import 'widgets/product_widgets/edit_product_form.dart';
 
 class EditProductScreen extends StatelessWidget {
   const EditProductScreen({super.key});

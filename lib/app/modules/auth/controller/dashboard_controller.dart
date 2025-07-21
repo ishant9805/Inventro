@@ -6,53 +6,46 @@ import '../../../data/services/product_service.dart';
 import '../../../data/models/product_model.dart';
 
 class DashboardController extends GetxController {
+  // ==================== OBSERVABLES ====================
   final isLoading = false.obs;
   final products = <ProductModel>[].obs;
   final filteredProducts = <ProductModel>[].obs;
   final searchQuery = ''.obs;
+  final errorMessage = ''.obs;
+  final hasError = false.obs;
+  final isInitialized = false.obs;
+
+  // ==================== CONTROLLERS & SERVICES ====================
   final searchController = TextEditingController();
   final ProductService _productService = ProductService();
 
-  // Add error message observable
-  var errorMessage = ''.obs;
-  var hasError = false.obs;
-  
-  // Add a flag to track if the controller is disposed
+  // ==================== PRIVATE STATE ====================
   bool _isDisposed = false;
-  
-  // Add initialization tracking
-  final isInitialized = false.obs;
-  
-  // Add a flag to prevent multiple concurrent initializations
   bool _isInitializing = false;
 
+  // ==================== LIFECYCLE METHODS ====================
   @override
   void onInit() {
     super.onInit();
-    // Initialize products fetch with proper error handling
-    _initializeProducts();
-    // Listen to search changes
-    searchController.addListener(_onSearchChanged);
+    _setupSearchListener();
+    _initializeController();
   }
 
   @override
   void onClose() {
-    _isDisposed = true;
-    
-    // Safely dispose search controller
-    try {
-      searchController.removeListener(_onSearchChanged);
-      searchController.dispose();
-    } catch (e) {
-      print('Error disposing search controller: $e');
-    }
-    
+    _cleanupController();
     super.onClose();
   }
 
-  // Enhanced initialization method with concurrency protection
-  Future<void> _initializeProducts() async {
-    // Prevent multiple concurrent initializations
+  // ==================== INITIALIZATION METHODS ====================
+  
+  /// Sets up the search controller listener
+  void _setupSearchListener() {
+    searchController.addListener(_onSearchChanged);
+  }
+
+  /// Initializes the controller with products
+  Future<void> _initializeController() async {
     if (_isInitializing || _isDisposed) return;
     
     _isInitializing = true;
@@ -65,219 +58,43 @@ class DashboardController extends GetxController {
     } catch (e) {
       print('❌ Failed to initialize products: $e');
       if (!_isDisposed) {
-        isInitialized.value = true; // Still mark as initialized to show error state
+        isInitialized.value = true; // Mark as initialized to show error state
       }
     } finally {
       _isInitializing = false;
     }
   }
 
-  // Add method to check if controller needs reinitialization
+  /// Cleans up resources when controller is disposed
+  void _cleanupController() {
+    _isDisposed = true;
+    
+    try {
+      searchController.removeListener(_onSearchChanged);
+      searchController.dispose();
+    } catch (e) {
+      print('Error disposing search controller: $e');
+    }
+  }
+
+  // ==================== PUBLIC METHODS ====================
+
+  /// Checks if controller needs reinitialization and handles it
   void checkAndReinitialize() {
     if (_isDisposed) return;
     
-    // Only reinitialize if not already initialized and not currently loading
     if (!isInitialized.value && !isLoading.value && !_isInitializing) {
       print('🔄 DashboardController: Reinitializing on return to dashboard');
-      _initializeProducts();
+      _initializeController();
     } else if (isInitialized.value && products.isEmpty) {
-      // Handle edge case where initialized but no products
       print('🔄 DashboardController: Refreshing empty product list');
       refreshProducts();
     }
   }
 
-  void _onSearchChanged() {
-    if (_isDisposed) return;
-    
-    searchQuery.value = searchController.text;
-    _filterProducts();
-  }
-
-  void _filterProducts() {
-    if (_isDisposed) return;
-    
-    try {
-      if (searchQuery.value.isEmpty) {
-        filteredProducts.value = products.toList();
-      } else {
-        filteredProducts.value = products.where((product) {
-          final query = searchQuery.value.toLowerCase();
-          return product.partNumber.toLowerCase().contains(query) ||
-                 product.description.toLowerCase().contains(query) ||
-                 product.location.toLowerCase().contains(query) ||
-                 product.batchNumber.toString().contains(query);
-        }).toList();
-      }
-    } catch (e) {
-      print('❌ Error filtering products: $e');
-      // Fallback to showing all products
-      filteredProducts.value = products.toList();
-    }
-  }
-
-  // Enhanced fetch method with comprehensive error handling and token validation
-  Future<void> fetchProducts() async {
-    if (_isDisposed) return;
-    
-    try {
-      // Clear any existing errors
-      clearError();
-      isLoading.value = true;
-
-      print('🔄 DashboardController: Starting product fetch...');
-      
-      // Validate authentication before making request
-      final authController = Get.find<AuthController>();
-      if (authController.user.value?.token == null) {
-        throw Exception('No authentication token found. Please login again.');
-      }
-
-      // Check if token validation is in progress with TIMEOUT
-      if (authController.isTokenValidating.value) {
-        print('🔄 DashboardController: Waiting for token validation to complete...');
-        
-        // Add timeout to prevent infinite waiting
-        int timeoutCounter = 0;
-        const maxTimeoutMs = 10000; // 10 seconds maximum wait
-        const checkIntervalMs = 100;
-        const maxChecks = maxTimeoutMs ~/ checkIntervalMs;
-        
-        while (authController.isTokenValidating.value && !_isDisposed && timeoutCounter < maxChecks) {
-          await Future.delayed(const Duration(milliseconds: checkIntervalMs));
-          timeoutCounter++;
-        }
-        
-        // Handle timeout case
-        if (timeoutCounter >= maxChecks) {
-          print('⚠️ DashboardController: Token validation timeout, proceeding anyway...');
-          // Don't throw error, just log and continue - the ProductService will handle auth validation
-        }
-        
-        // Check if user is still authenticated after validation
-        if (authController.user.value?.token == null) {
-          throw Exception('Session expired. Please login again.');
-        }
-      }
-
-      // Fetch products from API
-      final List<Map<String, dynamic>> productList = await _productService.getProducts();
-      
-      if (_isDisposed) return; // Check disposal after async operation
-
-      // Validate and convert products
-      final List<ProductModel> validProducts = [];
-      for (final productJson in productList) {
-        try {
-          // Validate product data before parsing
-          if (_validateProductData(productJson)) {
-            final product = ProductModel.fromJson(productJson);
-            validProducts.add(product);
-          } else {
-            print('⚠️ DashboardController: Skipping invalid product data: $productJson');
-          }
-        } catch (e) {
-          print('⚠️ DashboardController: Error parsing product: $e');
-          print('📄 DashboardController: Product data: $productJson');
-          // Continue with other products instead of failing completely
-        }
-      }
-
-      if (!_isDisposed) {
-        products.value = validProducts;
-        _filterProducts(); // Apply current search filter
-        print('✅ DashboardController: Successfully loaded ${validProducts.length} products');
-      }
-
-    } catch (e) {
-      print('❌ DashboardController: Error fetching products: $e');
-      
-      if (!_isDisposed) {
-        // Handle specific error types
-        final errorMessage = _getErrorMessage(e);
-        hasError.value = true;
-        this.errorMessage.value = errorMessage;
-        
-        // Show user-friendly error message
-        SafeNavigation.safeSnackbar(
-          title: 'Error Loading Products',
-          message: errorMessage,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withValues(alpha: 0.1),
-          colorText: Colors.red[800],
-          duration: const Duration(seconds: 4),
-        );
-        
-        // If it's an authentication error, the AuthService will handle logout
-        // For other errors, we can offer retry options
-        if (!errorMessage.contains('login again')) {
-          // Show retry option for non-auth errors after a delay
-          Future.delayed(const Duration(seconds: 5), () {
-            if (!_isDisposed && hasError.value) {
-              // Show a simple retry message, user can manually call retry
-              SafeNavigation.safeSnackbar(
-                title: 'Retry Available',
-                message: 'Pull down to refresh or try again later',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.blue.withValues(alpha: 0.1),
-                colorText: Colors.blue[800],
-                duration: const Duration(seconds: 3),
-              );
-            }
-          });
-        }
-      }
-    } finally {
-      // CRITICAL: Always ensure loading is set to false, even if an exception occurs
-      if (!_isDisposed) {
-        isLoading.value = false;
-        print('🏁 DashboardController: Loading state set to false');
-      }
-    }
-  }
-
-  // Helper method to validate product data before parsing
-  bool _validateProductData(Map<String, dynamic> data) {
-    try {
-      // Check for required fields
-      return data.containsKey('part_number') &&
-             data.containsKey('description') &&
-             data.containsKey('location') &&
-             data.containsKey('quantity') &&
-             data.containsKey('batch_number') &&
-             data.containsKey('expiry_date');
-    } catch (e) {
-      return false;
-    }
-  }
-
-  // Enhanced helper method to get user-friendly error messages
-  String _getErrorMessage(dynamic error) {
-    final errorStr = error.toString().replaceAll('Exception: ', '');
-    
-    if (errorStr.contains('timeout') || errorStr.contains('TimeoutException')) {
-      return 'Request timed out. Please check your internet connection and try again.';
-    } else if (errorStr.contains('Network') || errorStr.contains('network')) {
-      return 'Network error. Please check your internet connection and try again.';
-    } else if (errorStr.contains('Authentication failed') || errorStr.contains('login again')) {
-      return 'Your session has expired. Please login again.';
-    } else if (errorStr.contains('Invalid response format')) {
-      return 'Server returned invalid data. Please try again or contact support.';
-    } else if (errorStr.contains('server') || errorStr.contains('backend') || errorStr.contains('Server')) {
-      return 'Server error. Please try again later.';
-    } else if (errorStr.contains('Connection refused') || errorStr.contains('No route to host')) {
-      return 'Cannot connect to server. Please check your internet connection.';
-    } else {
-      return errorStr.isEmpty ? 'Unknown error occurred. Please try again.' : errorStr;
-    }
-  }
-
-  // Refresh products (called after adding/updating/deleting products)
+  /// Refreshes products (called after adding/updating/deleting products)
   Future<void> refreshProducts() async {
-    if (_isDisposed) return;
-    
-    // Prevent multiple concurrent refresh operations
-    if (isLoading.value) {
+    if (_isDisposed || isLoading.value) {
       print('🔄 DashboardController: Refresh already in progress, skipping...');
       return;
     }
@@ -286,150 +103,16 @@ class DashboardController extends GetxController {
     await fetchProducts();
   }
 
-  // Method to retry after error
+  /// Retries fetching products after an error
   Future<void> retryFetch() async {
     if (_isDisposed) return;
     
     print('🔄 DashboardController: Retrying product fetch...');
-    clearError();
+    _clearError();
     await fetchProducts();
   }
 
-  // Method to clear error state
-  void clearError() {
-    if (_isDisposed) return;
-    
-    hasError.value = false;
-    errorMessage.value = '';
-  }
-
-  // Get products that are expired with null safety
-  List<ProductModel> get expiredProducts {
-    try {
-      return products.where((product) {
-        try {
-          return product.isExpired; // Products that are already expired
-        } catch (e) {
-          return false; // Skip products with invalid dates
-        }
-      }).toList();
-    } catch (e) {
-      print('❌ Error getting expired products: $e');
-      return [];
-    }
-  }
-
-  // Get products that are expiring soon (but not yet expired) with null safety
-  List<ProductModel> get expiringProducts {
-    try {
-      return products.where((product) {
-        try {
-          // Products expiring within 30 days but not yet expired
-          return !product.isExpired && product.daysUntilExpiry <= 30 && product.daysUntilExpiry >= 0;
-        } catch (e) {
-          return false; // Skip products with invalid dates
-        }
-      }).toList();
-    } catch (e) {
-      print('❌ Error getting expiring products: $e');
-      return [];
-    }
-  }
-
-  // Get low stock products with null safety
-  List<ProductModel> get lowStockProducts {
-    try {
-      return products.where((product) {
-        try {
-          return product.quantity <= 2;
-        } catch (e) {
-          return false; // Skip products with invalid quantity
-        }
-      }).toList();
-    } catch (e) {
-      print('❌ Error getting low stock products: $e');
-      return [];
-    }
-  }
-
-  // Delete product with improved error handling
-  Future<void> deleteProduct(int productId) async {
-    if (_isDisposed) return;
-    
-    try {
-      isLoading.value = true;
-      await _productService.deleteProduct(productId);
-      
-      // Remove from both lists and trigger UI update
-      products.removeWhere((product) => product.id == productId);
-      _filterProducts(); // This will update filteredProducts and trigger UI refresh
-      
-      if (!_isDisposed) {
-        SafeNavigation.safeSnackbar(
-          title: 'Success',
-          message: 'Product deleted successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withValues(alpha: 0.1),
-          colorText: Colors.green[800],
-          duration: const Duration(seconds: 2),
-        );
-      }
-      
-    } catch (e) {
-      print('❌ Error deleting product: $e');
-      if (!_isDisposed) {
-        SafeNavigation.safeSnackbar(
-          title: 'Error',
-          message: 'Failed to delete product: ${_getErrorMessage(e)}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withValues(alpha: 0.1),
-          colorText: Colors.red[800],
-          duration: const Duration(seconds: 3),
-        );
-      }
-    } finally {
-      if (!_isDisposed) {
-        isLoading.value = false;
-      }
-    }
-  }
-
-  // Add a method to handle product updates from edit screen
-  void updateProductInList(ProductModel updatedProduct) {
-    if (_isDisposed) return;
-    
-    try {
-      final index = products.indexWhere((p) => p.id == updatedProduct.id);
-      if (index != -1) {
-        products[index] = updatedProduct;
-        products.refresh(); // Force observable update
-        _filterProducts(); // Update filtered list and trigger UI refresh
-        print('✅ DashboardController: Product updated in local list - ${updatedProduct.partNumber}');
-        print('📊 DashboardController: Total products: ${products.length}');
-      } else {
-        print('❌ DashboardController: Product not found for update - ID: ${updatedProduct.id}');
-      }
-    } catch (e) {
-      print('❌ Error updating product in list: $e');
-    }
-  }
-
-  // Add a method to handle new products from add screen  
-  void addProductToList(ProductModel newProduct) {
-    if (_isDisposed) return;
-    
-    try {
-      products.add(newProduct);
-      products.refresh(); // Force observable update
-      _filterProducts(); // Update filtered list and trigger UI refresh
-      print('✅ DashboardController: Product added to local list - ${newProduct.partNumber}');
-      print('📊 DashboardController: Total products: ${products.length}');
-    } catch (e) {
-      print('❌ Error adding product to list: $e');
-    }
-  }
-
-  // Clear search with null safety
+  /// Clears search input and filters
   void clearSearch() {
     if (_isDisposed) return;
     
@@ -442,44 +125,389 @@ class DashboardController extends GetxController {
     }
   }
 
-  // Test backend connection (for debugging)
+  /// Deletes a product by ID
+  Future<void> deleteProduct(int productId) async {
+    if (_isDisposed) return;
+    
+    try {
+      _setLoadingState(true);
+      await _productService.deleteProduct(productId);
+      
+      _removeProductFromLists(productId);
+      _showSuccessMessage('Product deleted successfully');
+      
+    } catch (e) {
+      print('❌ Error deleting product: $e');
+      _showErrorMessage('Failed to delete product: ${_getErrorMessage(e)}');
+    } finally {
+      _setLoadingState(false);
+    }
+  }
+
+  /// Updates a product in the local list
+  void updateProductInList(ProductModel updatedProduct) {
+    if (_isDisposed) return;
+    
+    try {
+      final index = products.indexWhere((p) => p.id == updatedProduct.id);
+      if (index != -1) {
+        products[index] = updatedProduct;
+        products.refresh();
+        _filterProducts();
+        print('✅ DashboardController: Product updated - ${updatedProduct.partNumber}');
+      } else {
+        print('❌ DashboardController: Product not found for update - ID: ${updatedProduct.id}');
+      }
+    } catch (e) {
+      print('❌ Error updating product in list: $e');
+    }
+  }
+
+  /// Adds a new product to the local list
+  void addProductToList(ProductModel newProduct) {
+    if (_isDisposed) return;
+    
+    try {
+      products.add(newProduct);
+      products.refresh();
+      _filterProducts();
+      print('✅ DashboardController: Product added - ${newProduct.partNumber}');
+    } catch (e) {
+      print('❌ Error adding product to list: $e');
+    }
+  }
+
+  /// Tests backend connection for debugging
   Future<void> testBackendConnection() async {
     if (_isDisposed) return;
     
     try {
-      SafeNavigation.safeSnackbar(
-        title: 'Testing Connection',
-        message: 'Checking backend connectivity...',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.blue.withValues(alpha: 0.1),
-        colorText: Colors.blue[800],
-        duration: const Duration(seconds: 2),
-      );
-      
-      // Try to fetch a single product or ping the server
+      _showInfoMessage('Testing Connection', 'Checking backend connectivity...');
       await _productService.getProducts();
-      
-      if (!_isDisposed) {
-        SafeNavigation.safeSnackbar(
-          title: 'Connection Successful',
-          message: 'Backend is reachable',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withValues(alpha: 0.1),
-          colorText: Colors.green[800],
-          duration: const Duration(seconds: 2),
-        );
-      }
+      _showSuccessMessage('Backend is reachable', title: 'Connection Successful');
     } catch (e) {
-      if (!_isDisposed) {
-        SafeNavigation.safeSnackbar(
-          title: 'Connection Failed',
-          message: 'Unable to reach backend: ${_getErrorMessage(e)}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withValues(alpha: 0.1),
-          colorText: Colors.red[800],
-          duration: const Duration(seconds: 4),
-        );
+      _showErrorMessage('Unable to reach backend: ${_getErrorMessage(e)}', title: 'Connection Failed');
+    }
+  }
+
+  // ==================== PRODUCT FETCHING METHODS ====================
+
+  /// Main method to fetch products from the API
+  Future<void> fetchProducts() async {
+    if (_isDisposed) return;
+    
+    try {
+      _prepareForFetch();
+      await _validateAuthentication();
+      
+      final productList = await _productService.getProducts();
+      if (_isDisposed) return;
+
+      final validProducts = _processProductData(productList);
+      _updateProductLists(validProducts);
+      
+    } catch (e) {
+      _handleFetchError(e);
+    } finally {
+      _setLoadingState(false);
+    }
+  }
+
+  /// Prepares the controller state for fetching
+  void _prepareForFetch() {
+    _clearError();
+    _setLoadingState(true);
+    print('🔄 DashboardController: Starting product fetch...');
+  }
+
+  /// Validates user authentication before making API requests
+  Future<void> _validateAuthentication() async {
+    final authController = Get.find<AuthController>();
+    
+    if (authController.user.value?.token == null) {
+      throw Exception('No authentication token found. Please login again.');
+    }
+
+    await _waitForTokenValidation(authController);
+    
+    if (authController.user.value?.token == null) {
+      throw Exception('Session expired. Please login again.');
+    }
+  }
+
+  /// Waits for token validation to complete with timeout
+  Future<void> _waitForTokenValidation(AuthController authController) async {
+    if (!authController.isTokenValidating.value) return;
+
+    print('🔄 DashboardController: Waiting for token validation...');
+    
+    const maxTimeoutMs = 10000; // 10 seconds
+    const checkIntervalMs = 100;
+    int timeoutCounter = 0;
+    
+    while (authController.isTokenValidating.value && 
+           !_isDisposed && 
+           timeoutCounter < (maxTimeoutMs ~/ checkIntervalMs)) {
+      await Future.delayed(const Duration(milliseconds: checkIntervalMs));
+      timeoutCounter++;
+    }
+    
+    if (timeoutCounter >= (maxTimeoutMs ~/ checkIntervalMs)) {
+      print('⚠️ DashboardController: Token validation timeout, proceeding...');
+    }
+  }
+
+  /// Processes raw product data into ProductModel objects
+  List<ProductModel> _processProductData(List<Map<String, dynamic>> productList) {
+    final validProducts = <ProductModel>[];
+    
+    for (final productJson in productList) {
+      try {
+        if (_isValidProductData(productJson)) {
+          final product = ProductModel.fromJson(productJson);
+          validProducts.add(product);
+        } else {
+          print('⚠️ DashboardController: Skipping invalid product data');
+        }
+      } catch (e) {
+        print('⚠️ DashboardController: Error parsing product: $e');
       }
     }
+    
+    return validProducts;
+  }
+
+  /// Updates the product lists with new data
+  void _updateProductLists(List<ProductModel> validProducts) {
+    if (!_isDisposed) {
+      products.value = validProducts;
+      _filterProducts();
+      print('✅ DashboardController: Successfully loaded ${validProducts.length} products');
+    }
+  }
+
+  /// Handles errors that occur during product fetching
+  void _handleFetchError(dynamic error) {
+    print('❌ DashboardController: Error fetching products: $error');
+    
+    if (!_isDisposed) {
+      final errorMsg = _getErrorMessage(error);
+      _setError(errorMsg);
+      _showErrorMessage(errorMsg, title: 'Error Loading Products');
+      _scheduleRetryPrompt(errorMsg);
+    }
+  }
+
+  // ==================== VALIDATION METHODS ====================
+
+  /// Validates if product data contains required fields
+  bool _isValidProductData(Map<String, dynamic> data) {
+    try {
+      return data.containsKey('part_number') &&
+             data.containsKey('description') &&
+             data.containsKey('location') &&
+             data.containsKey('quantity') &&
+             data.containsKey('batch_number') &&
+             data.containsKey('expiry_date');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // ==================== FILTERING METHODS ====================
+
+  /// Handles search query changes
+  void _onSearchChanged() {
+    if (_isDisposed) return;
+    
+    searchQuery.value = searchController.text;
+    _filterProducts();
+  }
+
+  /// Filters products based on current search query
+  void _filterProducts() {
+    if (_isDisposed) return;
+    
+    try {
+      if (searchQuery.value.isEmpty) {
+        filteredProducts.value = products.toList();
+      } else {
+        filteredProducts.value = _getFilteredProducts();
+      }
+    } catch (e) {
+      print('❌ Error filtering products: $e');
+      filteredProducts.value = products.toList(); // Fallback
+    }
+  }
+
+  /// Gets products that match the current search query
+  List<ProductModel> _getFilteredProducts() {
+    final query = searchQuery.value.toLowerCase();
+    
+    return products.where((product) {
+      return product.partNumber.toLowerCase().contains(query) ||
+             product.description.toLowerCase().contains(query) ||
+             product.location.toLowerCase().contains(query) ||
+             product.batchNumber.toString().contains(query);
+    }).toList();
+  }
+
+  // ==================== COMPUTED PROPERTIES ====================
+
+  /// Gets products that are expired
+  List<ProductModel> get expiredProducts {
+    try {
+      return products.where((product) {
+        try {
+          return product.isExpired;
+        } catch (e) {
+          return false;
+        }
+      }).toList();
+    } catch (e) {
+      print('❌ Error getting expired products: $e');
+      return [];
+    }
+  }
+
+  /// Gets products that are expiring soon (within 30 days)
+  List<ProductModel> get expiringProducts {
+    try {
+      return products.where((product) {
+        try {
+          return !product.isExpired && 
+                 product.daysUntilExpiry <= 30 && 
+                 product.daysUntilExpiry >= 0;
+        } catch (e) {
+          return false;
+        }
+      }).toList();
+    } catch (e) {
+      print('❌ Error getting expiring products: $e');
+      return [];
+    }
+  }
+
+  /// Gets products with low stock (quantity <= 2)
+  List<ProductModel> get lowStockProducts {
+    try {
+      return products.where((product) {
+        try {
+          return product.quantity <= 2;
+        } catch (e) {
+          return false;
+        }
+      }).toList();
+    } catch (e) {
+      print('❌ Error getting low stock products: $e');
+      return [];
+    }
+  }
+
+  // ==================== STATE MANAGEMENT HELPERS ====================
+
+  /// Sets the loading state safely
+  void _setLoadingState(bool loading) {
+    if (!_isDisposed) {
+      isLoading.value = loading;
+    }
+  }
+
+  /// Sets error state with message
+  void _setError(String message) {
+    hasError.value = true;
+    errorMessage.value = message;
+  }
+
+  /// Clears error state
+  void _clearError() {
+    if (_isDisposed) return;
+    
+    hasError.value = false;
+    errorMessage.value = '';
+  }
+
+  /// Removes a product from both product lists
+  void _removeProductFromLists(int productId) {
+    products.removeWhere((product) => product.id == productId);
+    _filterProducts(); // This will update filteredProducts
+  }
+
+  // ==================== ERROR HANDLING HELPERS ====================
+
+  /// Gets user-friendly error message from exception
+  String _getErrorMessage(dynamic error) {
+    final errorStr = error.toString().replaceAll('Exception: ', '');
+    
+    if (errorStr.contains('timeout')) {
+      return 'Request timed out. Please check your internet connection.';
+    } else if (errorStr.contains('Network') || errorStr.contains('network')) {
+      return 'Network error. Please check your internet connection.';
+    } else if (errorStr.contains('login again')) {
+      return 'Your session has expired. Please login again.';
+    } else if (errorStr.contains('Invalid response format')) {
+      return 'Server returned invalid data. Please try again.';
+    } else if (errorStr.contains('server') || errorStr.contains('Server')) {
+      return 'Server error. Please try again later.';
+    } else if (errorStr.contains('Connection refused')) {
+      return 'Cannot connect to server. Please check your internet connection.';
+    } else {
+      return errorStr.isEmpty ? 'Unknown error occurred. Please try again.' : errorStr;
+    }
+  }
+
+  /// Schedules a retry prompt for non-authentication errors
+  void _scheduleRetryPrompt(String errorMessage) {
+    if (errorMessage.contains('login again')) return;
+    
+    Future.delayed(const Duration(seconds: 5), () {
+      if (!_isDisposed && hasError.value) {
+        _showInfoMessage('Retry Available', 'Pull down to refresh or try again later');
+      }
+    });
+  }
+
+  // ==================== UI FEEDBACK HELPERS ====================
+
+  /// Shows success message to user
+  void _showSuccessMessage(String message, {String title = 'Success'}) {
+    if (_isDisposed) return;
+    
+    SafeNavigation.safeSnackbar(
+      title: title,
+      message: message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.green.withValues(alpha: 0.1),
+      colorText: Colors.green[800],
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  /// Shows error message to user
+  void _showErrorMessage(String message, {String title = 'Error'}) {
+    if (_isDisposed) return;
+    
+    SafeNavigation.safeSnackbar(
+      title: title,
+      message: message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red.withValues(alpha: 0.1),
+      colorText: Colors.red[800],
+      duration: const Duration(seconds: 4),
+    );
+  }
+
+  /// Shows info message to user
+  void _showInfoMessage(String title, String message) {
+    if (_isDisposed) return;
+    
+    SafeNavigation.safeSnackbar(
+      title: title,
+      message: message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.blue.withValues(alpha: 0.1),
+      colorText: Colors.blue[800],
+      duration: const Duration(seconds: 2),
+    );
   }
 }

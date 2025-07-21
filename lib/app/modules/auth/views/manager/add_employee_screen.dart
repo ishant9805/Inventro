@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/utils/safe_navigation.dart';
 import '../../controller/add_employee_controller.dart';
-import 'widgets/add_employee_header.dart';
-import 'widgets/add_employee_form.dart';
+import 'widgets/employee_widgets/add_employee_header.dart';
+import 'widgets/employee_widgets/add_employee_form.dart';
 
 class AddEmployeeScreen extends StatelessWidget {
   AddEmployeeScreen({super.key});
