@@ -235,7 +235,7 @@ class _ManagerRegistrationScreenState extends State<ManagerRegistrationScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Container(
+                            SizedBox(
                               height: 56,
                               child: ElevatedButton.icon(
                                 onPressed: isLoadingCompany ? null : _validateCompanyId,

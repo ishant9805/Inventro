@@ -6,7 +6,7 @@ import 'widgets/edit_product_header.dart';
 import 'widgets/edit_product_form.dart';
 
 class EditProductScreen extends StatelessWidget {
-  EditProductScreen({super.key});
+  const EditProductScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

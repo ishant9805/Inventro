@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:inventro/app/modules/auth/views/employee/employee_login_screen.dart';
+import 'package:inventro/app/modules/auth/views/employee/employee_dashboard.dart';
 import 'package:inventro/app/modules/auth/views/manager/add_employee_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/add_product_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/edit_product_screen.dart';
@@ -12,14 +13,21 @@ import 'package:inventro/app/modules/auth/views/splash_screen.dart';
 import '../modules/auth/views/manager/company_creation_page.dart';
 import '../modules/auth/views/manager/create_company_screen.dart';
 import '../modules/auth/views/manager/manager_registration_screen.dart';
+// FIXED: Import all lazy bindings
+import '../modules/auth/bindings/dashboard_binding.dart';
+import '../modules/auth/bindings/employee_list_binding.dart';
+import '../modules/auth/bindings/add_product_binding.dart';
 import '../modules/auth/bindings/edit_product_binding.dart';
-
+import '../modules/auth/bindings/add_employee_binding.dart';
+import '../modules/auth/bindings/employee_dashboard_binding.dart';
+import '../middleware/auth_middleware.dart';
 import 'app_routes.dart';
 
 class AppPages {
   static const INITIAL = '/';
 
   static final pages = [
+    // Public routes (no middleware)
     GetPage(
       name: AppRoutes.splash,
       page: () => const SplashScreen(),
@@ -28,50 +36,77 @@ class AppPages {
       name: AppRoutes.roleSelection,
       page: () => const RoleSelectionScreen(),
     ),
+
+    // Guest routes (redirect if authenticated)
     GetPage(
       name: AppRoutes.login,
       page: () => LoginScreen(),
-    ),
-    GetPage(
-      name: AppRoutes.dashboard,
-      page: () => ManagerDashboard(),
-    ),
-    GetPage(
-      name: AppRoutes.addEmployee,
-      page: () => AddEmployeeScreen(),
-    ),
-    GetPage(
-      name: AppRoutes.addProduct,
-      page: () => AddProductScreen(),
-    ),
-    GetPage(
-      name: AppRoutes.editProduct,
-      page: () => EditProductScreen(),
-      binding: EditProductBinding(), // Add proper binding for controller management
-    ),
-    GetPage(
-      name: AppRoutes.managerProfile,
-      page: () => ManagerProfileScreen(),
-    ),
-    GetPage(
-      name: AppRoutes.employeeList,
-      page: () => EmployeeListScreen(),
+      middlewares: [GuestMiddleware()],
     ),
     GetPage(
       name: AppRoutes.employeeLogin,
       page: () => EmployeeLoginScreen(),
+      middlewares: [GuestMiddleware()],
     ),
     GetPage(
       name: AppRoutes.companyCreation,
       page: () => CompanyCreationPage(),
+      middlewares: [GuestMiddleware()],
     ),
     GetPage(
       name: AppRoutes.createCompanyScreen,
       page: () => const CreateCompanyScreen(),
+      middlewares: [GuestMiddleware()],
     ),
     GetPage(
       name: AppRoutes.managerRegistration,
       page: () => const ManagerRegistrationScreen(),
+      middlewares: [GuestMiddleware()],
+    ),
+
+    // FIXED: Protected manager routes with lazy bindings
+    GetPage(
+      name: AppRoutes.dashboard,
+      page: () => const ManagerDashboard(),
+      binding: DashboardBinding(), // Lazy loading
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.addEmployee,
+      page: () => AddEmployeeScreen(),
+      binding: AddEmployeeBinding(), // Lazy loading
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.addProduct,
+      page: () => AddProductScreen(),
+      binding: AddProductBinding(), // Lazy loading
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.editProduct,
+      page: () => EditProductScreen(),
+      binding: EditProductBinding(), // Already had lazy loading
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.managerProfile,
+      page: () => ManagerProfileScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.employeeList,
+      page: () => EmployeeListScreen(),
+      binding: EmployeeListBinding(), // Lazy loading
+      middlewares: [AuthMiddleware()],
+    ),
+
+    // FIXED: Protected employee routes with lazy bindings
+    GetPage(
+      name: AppRoutes.employeeDashboard,
+      page: () => const EmployeeDashboard(),
+      binding: EmployeeDashboardBinding(), // Lazy loading
+      middlewares: [AuthMiddleware()],
     ),
   ];
 }

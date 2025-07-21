@@ -119,7 +119,7 @@ class EmployeeTile extends StatelessWidget {
             ),
           ],
         ),
-        if (employee.phone?.isNotEmpty == true) ...[
+        if (employee.phone.isNotEmpty == true) ...[
           const SizedBox(height: 8),
           Row(
             children: [
@@ -130,7 +130,7 @@ class EmployeeTile extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                employee.phone!,
+                employee.phone,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[600],
@@ -292,8 +292,8 @@ class EmployeeTile extends StatelessWidget {
           children: [
             _buildDetailRow(Icons.email, 'Email', employee.email),
             _buildDetailRow(Icons.business, 'Department', employee.department),
-            if (employee.phone?.isNotEmpty == true)
-              _buildDetailRow(Icons.phone, 'Phone', employee.phone!),
+            if (employee.phone.isNotEmpty == true)
+              _buildDetailRow(Icons.phone, 'Phone', employee.phone),
             _buildDetailRow(Icons.badge, 'Role', employee.role),
             if (employee.id != null)
               _buildDetailRow(Icons.tag, 'Employee ID', employee.id.toString()),

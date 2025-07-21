@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 import 'package:inventro/app/utils/safe_navigation.dart';
 import '../../../data/services/product_service.dart';
 import '../../../data/models/product_model.dart';
@@ -115,92 +116,122 @@ class DashboardController extends GetxController {
     }
   }
 
-  // Helper method to get user-friendly error messages
-  String _getErrorMessage(dynamic error) {
-    final errorStr = error.toString().replaceAll('Exception: ', '');
-    
-    if (errorStr.contains('timeout')) {
-      return 'Request timed out. Please check your internet connection.';
-    } else if (errorStr.contains('Network')) {
-      return 'Network error. Please check your internet connection.';
-    } else if (errorStr.contains('token')) {
-      return 'Authentication error. Please login again.';
-    } else if (errorStr.contains('server') || errorStr.contains('backend')) {
-      return 'Server error. Please try again later.';
-    } else {
-      return errorStr.isEmpty ? 'Unknown error occurred' : errorStr;
-    }
-  }
-
-  // Enhanced fetch method with better loading state management
+  // Enhanced fetch method with comprehensive error handling and token validation
   Future<void> fetchProducts() async {
     if (_isDisposed) return;
     
     try {
-      // Only set loading if not already loading
-      if (!isLoading.value) {
-        isLoading.value = true;
-      }
-      hasError.value = false;
-      errorMessage.value = '';
-      
+      // Clear any existing errors
+      clearError();
+      isLoading.value = true;
+
       print('🔄 DashboardController: Starting product fetch...');
       
-      // Get products from service with timeout
-      final productMaps = await _productService.getProducts()
-          .timeout(const Duration(seconds: 45)); // Extended timeout
+      // Validate authentication before making request
+      final authController = Get.find<AuthController>();
+      if (authController.user.value?.token == null) {
+        throw Exception('No authentication token found. Please login again.');
+      }
+
+      // Check if token validation is in progress with TIMEOUT
+      if (authController.isTokenValidating.value) {
+        print('🔄 DashboardController: Waiting for token validation to complete...');
+        
+        // Add timeout to prevent infinite waiting
+        int timeoutCounter = 0;
+        const maxTimeoutMs = 10000; // 10 seconds maximum wait
+        const checkIntervalMs = 100;
+        const maxChecks = maxTimeoutMs ~/ checkIntervalMs;
+        
+        while (authController.isTokenValidating.value && !_isDisposed && timeoutCounter < maxChecks) {
+          await Future.delayed(const Duration(milliseconds: checkIntervalMs));
+          timeoutCounter++;
+        }
+        
+        // Handle timeout case
+        if (timeoutCounter >= maxChecks) {
+          print('⚠️ DashboardController: Token validation timeout, proceeding anyway...');
+          // Don't throw error, just log and continue - the ProductService will handle auth validation
+        }
+        
+        // Check if user is still authenticated after validation
+        if (authController.user.value?.token == null) {
+          throw Exception('Session expired. Please login again.');
+        }
+      }
+
+      // Fetch products from API
+      final List<Map<String, dynamic>> productList = await _productService.getProducts();
       
-      print('📦 DashboardController: Raw product data received: ${productMaps.length} items');
-      
-      // Convert to ProductModel objects with better error handling
-      final List<ProductModel> productList = [];
-      for (int i = 0; i < productMaps.length; i++) {
+      if (_isDisposed) return; // Check disposal after async operation
+
+      // Validate and convert products
+      final List<ProductModel> validProducts = [];
+      for (final productJson in productList) {
         try {
-          final productData = productMaps[i];
-          
-          // Validate required fields before creating model
-          if (_validateProductData(productData)) {
-            final product = ProductModel.fromJson(productData);
-            productList.add(product);
-            print('✅ Successfully created ProductModel: ${product.partNumber}');
+          // Validate product data before parsing
+          if (_validateProductData(productJson)) {
+            final product = ProductModel.fromJson(productJson);
+            validProducts.add(product);
           } else {
-            print('⚠️ Skipping invalid product at index $i: missing required fields');
+            print('⚠️ DashboardController: Skipping invalid product data: $productJson');
           }
         } catch (e) {
-          print('❌ Error parsing product at index $i: $e');
-          print('📋 Product data: ${productMaps[i]}');
+          print('⚠️ DashboardController: Error parsing product: $e');
+          print('📄 DashboardController: Product data: $productJson');
           // Continue with other products instead of failing completely
         }
       }
-      
+
       if (!_isDisposed) {
-        products.value = productList;
-        // Update filtered products safely
-        _filterProducts();
-        print('✅ DashboardController: Successfully loaded ${products.length} products');
+        products.value = validProducts;
+        _filterProducts(); // Apply current search filter
+        print('✅ DashboardController: Successfully loaded ${validProducts.length} products');
       }
-      
+
     } catch (e) {
       print('❌ DashboardController: Error fetching products: $e');
       
       if (!_isDisposed) {
+        // Handle specific error types
+        final errorMessage = _getErrorMessage(e);
         hasError.value = true;
-        errorMessage.value = _getErrorMessage(e);
+        this.errorMessage.value = errorMessage;
         
-        // Show user-friendly error message using safe snackbar
+        // Show user-friendly error message
         SafeNavigation.safeSnackbar(
           title: 'Error Loading Products',
-          message: errorMessage.value,
-          snackPosition: SnackPosition.TOP,
+          message: errorMessage,
+          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red.withValues(alpha: 0.1),
           colorText: Colors.red[800],
-          duration: const Duration(seconds: 5),
+          duration: const Duration(seconds: 4),
         );
+        
+        // If it's an authentication error, the AuthService will handle logout
+        // For other errors, we can offer retry options
+        if (!errorMessage.contains('login again')) {
+          // Show retry option for non-auth errors after a delay
+          Future.delayed(const Duration(seconds: 5), () {
+            if (!_isDisposed && hasError.value) {
+              // Show a simple retry message, user can manually call retry
+              SafeNavigation.safeSnackbar(
+                title: 'Retry Available',
+                message: 'Pull down to refresh or try again later',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                colorText: Colors.blue[800],
+                duration: const Duration(seconds: 3),
+              );
+            }
+          });
+        }
       }
     } finally {
-      // Always ensure loading is set to false
+      // CRITICAL: Always ensure loading is set to false, even if an exception occurs
       if (!_isDisposed) {
         isLoading.value = false;
+        print('🏁 DashboardController: Loading state set to false');
       }
     }
   }
@@ -220,9 +251,36 @@ class DashboardController extends GetxController {
     }
   }
 
+  // Enhanced helper method to get user-friendly error messages
+  String _getErrorMessage(dynamic error) {
+    final errorStr = error.toString().replaceAll('Exception: ', '');
+    
+    if (errorStr.contains('timeout') || errorStr.contains('TimeoutException')) {
+      return 'Request timed out. Please check your internet connection and try again.';
+    } else if (errorStr.contains('Network') || errorStr.contains('network')) {
+      return 'Network error. Please check your internet connection and try again.';
+    } else if (errorStr.contains('Authentication failed') || errorStr.contains('login again')) {
+      return 'Your session has expired. Please login again.';
+    } else if (errorStr.contains('Invalid response format')) {
+      return 'Server returned invalid data. Please try again or contact support.';
+    } else if (errorStr.contains('server') || errorStr.contains('backend') || errorStr.contains('Server')) {
+      return 'Server error. Please try again later.';
+    } else if (errorStr.contains('Connection refused') || errorStr.contains('No route to host')) {
+      return 'Cannot connect to server. Please check your internet connection.';
+    } else {
+      return errorStr.isEmpty ? 'Unknown error occurred. Please try again.' : errorStr;
+    }
+  }
+
   // Refresh products (called after adding/updating/deleting products)
   Future<void> refreshProducts() async {
     if (_isDisposed) return;
+    
+    // Prevent multiple concurrent refresh operations
+    if (isLoading.value) {
+      print('🔄 DashboardController: Refresh already in progress, skipping...');
+      return;
+    }
     
     print('🔄 DashboardController: Refreshing products...');
     await fetchProducts();
@@ -245,12 +303,29 @@ class DashboardController extends GetxController {
     errorMessage.value = '';
   }
 
-  // Get products that are expired or expiring soon with null safety
+  // Get products that are expired with null safety
+  List<ProductModel> get expiredProducts {
+    try {
+      return products.where((product) {
+        try {
+          return product.isExpired; // Products that are already expired
+        } catch (e) {
+          return false; // Skip products with invalid dates
+        }
+      }).toList();
+    } catch (e) {
+      print('❌ Error getting expired products: $e');
+      return [];
+    }
+  }
+
+  // Get products that are expiring soon (but not yet expired) with null safety
   List<ProductModel> get expiringProducts {
     try {
       return products.where((product) {
         try {
-          return product.daysUntilExpiry <= 7; // Products expiring within 7 days
+          // Products expiring within 30 days but not yet expired
+          return !product.isExpired && product.daysUntilExpiry <= 30 && product.daysUntilExpiry >= 0;
         } catch (e) {
           return false; // Skip products with invalid dates
         }

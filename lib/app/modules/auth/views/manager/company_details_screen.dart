@@ -7,10 +7,10 @@ class CompanyDetailsScreen extends StatelessWidget {
   final int employeeCount;
 
   const CompanyDetailsScreen({
-    Key? key,
+    super.key,
     required this.companyData,
     required this.employeeCount,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

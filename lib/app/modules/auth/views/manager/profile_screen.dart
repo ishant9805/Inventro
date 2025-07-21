@@ -5,7 +5,7 @@ import 'package:inventro/app/utils/safe_navigation.dart';
 import '../../controller/auth_controller.dart';
 
 class ManagerProfileScreen extends StatefulWidget {
-  ManagerProfileScreen({super.key});
+  const ManagerProfileScreen({super.key});
 
   @override
   State<ManagerProfileScreen> createState() => _ManagerProfileScreenState();
@@ -226,7 +226,7 @@ class _ManagerProfileScreenState extends State<ManagerProfileScreen> {
           _buildInfoRow(
             icon: Icons.badge,
             label: 'Role',
-            value: user?.role?.capitalize ?? 'Manager',
+            value: user?.role.capitalize ?? 'Manager',
           ),
         ],
       ),

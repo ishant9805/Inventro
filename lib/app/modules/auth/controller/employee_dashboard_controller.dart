@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:flutter/material.dart';
 import 'package:inventro/app/utils/safe_navigation.dart';
 import '../../../data/services/product_service.dart';
 import '../../../data/models/product_model.dart';

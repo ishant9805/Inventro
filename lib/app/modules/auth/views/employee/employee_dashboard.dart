@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../controller/employee_dashboard_controller.dart';
 
 class EmployeeDashboard extends StatelessWidget {
-  const EmployeeDashboard({Key? key}) : super(key: key);
+  const EmployeeDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {

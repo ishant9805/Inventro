@@ -40,93 +40,57 @@ class DashboardStatCards extends StatelessWidget {
             ),
           ),
           SizedBox(height: ResponsiveUtils.getSpacing(context, 20)),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              if (ResponsiveUtils.isSmallScreen(context)) {
-                // Stack cards vertically on small screens
-                return _buildVerticalLayout(context);
-              } else {
-                // Keep horizontal layout for larger screens
-                return _buildHorizontalLayout(context);
-              }
-            },
-          ),
+          // Replace grid/row layout with stacked list layout
+          _buildStackedListLayout(context),
         ],
       ),
     );
   }
 
-  Widget _buildHorizontalLayout(BuildContext context) {
-    return Obx(() => Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            context: context,
-            title: 'Total Products',
-            value: '${dashboardController.products.length}',
-            icon: Icons.inventory,
-            color: const Color(0xFF4A00E0),
-          ),
-        ),
-        SizedBox(width: ResponsiveUtils.getSpacing(context, 16)),
-        Expanded(
-          child: _buildStatCard(
-            context: context,
-            title: 'Low Stock',
-            value: '${dashboardController.lowStockProducts.length}',
-            icon: Icons.warning,
-            color: const Color(0xFF800020),
-          ),
-        ),
-        SizedBox(width: ResponsiveUtils.getSpacing(context, 16)),
-        Expanded(
-          child: _buildStatCard(
-            context: context,
-            title: 'Expiring Soon',
-            value: '${dashboardController.expiringProducts.length}',
-            icon: Icons.schedule,
-            color: Colors.yellow,
-          ),
-        ),
-      ],
-    ));
-  }
-
-  Widget _buildVerticalLayout(BuildContext context) {
+  /// Builds a vertical stacked list of cards, each taking full width
+  Widget _buildStackedListLayout(BuildContext context) {
     return Obx(() => Column(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                context: context,
-                title: 'Total Products',
-                value: '${dashboardController.products.length}',
-                icon: Icons.inventory,
-                color: const Color(0xFF4A00E0),
-                isCompact: true,
-              ),
-            ),
-            SizedBox(width: ResponsiveUtils.getSpacing(context, 12)),
-            Expanded(
-              child: _buildStatCard(
-                context: context,
-                title: 'Low Stock',
-                value: '${dashboardController.lowStockProducts.length}',
-                icon: Icons.warning,
-                color: const Color(0xFF800020),
-                isCompact: true,
-              ),
-            ),
-          ],
+        // Total Products Card
+        _buildStatCard(
+          context: context,
+          title: 'Total Products',
+          value: '${dashboardController.products.length}',
+          icon: Icons.inventory,
+          color: const Color(0xFF4A00E0),
+          isFullWidth: true,
         ),
-        SizedBox(height: ResponsiveUtils.getSpacing(context, 12)),
+        SizedBox(height: ResponsiveUtils.getSpacing(context, 16)),
+        
+        // Low Stock Card
+        _buildStatCard(
+          context: context,
+          title: 'Low Stock',
+          value: '${dashboardController.lowStockProducts.length}',
+          icon: Icons.warning,
+          color: const Color(0xFF800020),
+          isFullWidth: true,
+        ),
+        SizedBox(height: ResponsiveUtils.getSpacing(context, 16)),
+        
+        // Expiring Soon Card
         _buildStatCard(
           context: context,
           title: 'Expiring Soon',
           value: '${dashboardController.expiringProducts.length}',
           icon: Icons.schedule,
-          color: Colors.orange,
+          color: const Color(0xFFFFC107), // Amber/Yellow for warning
+          isFullWidth: true,
+        ),
+        SizedBox(height: ResponsiveUtils.getSpacing(context, 16)),
+        
+        // Expired Card
+        _buildStatCard(
+          context: context,
+          title: 'Expired',
+          value: '${dashboardController.expiredProducts.length}',
+          icon: Icons.error,
+          color: const Color(0xFFDC3545), // Red for expired
           isFullWidth: true,
         ),
       ],
@@ -143,7 +107,7 @@ class DashboardStatCards extends StatelessWidget {
     bool isFullWidth = false,
   }) {
     final cardPadding = ResponsiveUtils.getPadding(context, 
-        factor: isCompact ? 0.04 : 0.05);
+        factor: isFullWidth ? 0.05 : (isCompact ? 0.04 : 0.05));
     
     return Container(
       width: isFullWidth ? double.infinity : null,
@@ -229,18 +193,18 @@ class DashboardStatCards extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 12)),
+          padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 16)),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 12)),
           ),
           child: Icon(
             icon, 
-            size: ResponsiveUtils.getIconSize(context, 24), 
+            size: ResponsiveUtils.getIconSize(context, 28), 
             color: color,
           ),
         ),
-        SizedBox(width: ResponsiveUtils.getSpacing(context, 16)),
+        SizedBox(width: ResponsiveUtils.getSpacing(context, 20)),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,21 +212,34 @@ class DashboardStatCards extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: ResponsiveUtils.getFontSize(context, 14),
+                  fontSize: ResponsiveUtils.getFontSize(context, 16),
                   color: const Color(0xFF6C757D),
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: ResponsiveUtils.getSpacing(context, 4)),
+              SizedBox(height: ResponsiveUtils.getSpacing(context, 6)),
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: ResponsiveUtils.getFontSize(context, 20),
+                  fontSize: ResponsiveUtils.getFontSize(context, 24),
                   fontWeight: FontWeight.bold,
                   color: color,
                 ),
               ),
             ],
+          ),
+        ),
+        // Optional: Add a subtle arrow or indicator for better list UI
+        Container(
+          padding: EdgeInsets.all(ResponsiveUtils.getSpacing(context, 8)),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(ResponsiveUtils.getSpacing(context, 8)),
+          ),
+          child: Icon(
+            Icons.analytics_outlined,
+            size: ResponsiveUtils.getIconSize(context, 20),
+            color: color.withOpacity(0.7),
           ),
         ),
       ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../modules/auth/controller/auth_controller.dart';
 
 class SafeNavigation {
   /// Safely navigate back, handling any overlay or snackbar issues
@@ -39,8 +40,8 @@ class SafeNavigation {
       if (Get.context != null && Navigator.canPop(Get.context!)) {
         Get.back(result: result);
       } else {
-        // If can't pop, go to a safe route
-        Get.offAllNamed('/dashboard');
+        // 🔧 FIXED: Smart fallback based on authentication state
+        _handleSafeFallbackNavigation();
       }
     } catch (e) {
       print('Error in _performBack: $e');
@@ -51,12 +52,42 @@ class SafeNavigation {
         }
       } catch (navigatorError) {
         print('Final Navigator fallback failed: $navigatorError');
-        // Last resort - try to navigate to dashboard
-        try {
-          Get.offAllNamed('/dashboard');
-        } catch (finalError) {
-          print('All navigation methods failed: $finalError');
-        }
+        // 🔧 FIXED: Use smart fallback instead of dashboard
+        _handleSafeFallbackNavigation();
+      }
+    }
+  }
+
+  /// Smart fallback navigation based on authentication state
+  static void _handleSafeFallbackNavigation() {
+    try {
+      // Check if user is authenticated
+      bool isAuthenticated = false;
+      try {
+        final authController = Get.find<AuthController>();
+        isAuthenticated = authController.user.value != null && 
+                         authController.user.value!.token.isNotEmpty;
+      } catch (e) {
+        // AuthController not found or error - assume not authenticated
+        isAuthenticated = false;
+      }
+
+      if (isAuthenticated) {
+        // User is authenticated, safe to go to dashboard
+        print('🔄 SafeNavigation: User authenticated, navigating to dashboard');
+        Get.offAllNamed('/dashboard');
+      } else {
+        // User is not authenticated, go to role selection
+        print('🔄 SafeNavigation: User not authenticated, navigating to role selection');
+        Get.offAllNamed('/role-selection');
+      }
+    } catch (finalError) {
+      print('All navigation methods failed: $finalError');
+      // Absolute last resort - try role selection directly
+      try {
+        Get.offAllNamed('/role-selection');
+      } catch (e) {
+        print('Even role-selection navigation failed: $e');
       }
     }
   }
@@ -89,6 +120,75 @@ class SafeNavigation {
       });
     } catch (e) {
       print('Error showing snackbar: $e');
+    }
+  }
+
+  /// Safe navigation with authentication check
+  static Future<void> safeNavigateWithAuthCheck(String route, {dynamic arguments}) async {
+    try {
+      // Check authentication before navigating to protected routes
+      if (_isProtectedRoute(route)) {
+        bool isAuthenticated = false;
+        try {
+          final authController = Get.find<AuthController>();
+          isAuthenticated = authController.user.value != null && 
+                           authController.user.value!.token.isNotEmpty;
+        } catch (e) {
+          isAuthenticated = false;
+        }
+
+        if (!isAuthenticated) {
+          print('🚫 SafeNavigation: Blocked navigation to protected route $route - not authenticated');
+          safeSnackbar(
+            title: 'Authentication Required',
+            message: 'Please login to access this feature',
+            backgroundColor: Colors.orange.withOpacity(0.1),
+            colorText: Colors.orange[800],
+          );
+          Get.offAllNamed('/role-selection');
+          return;
+        }
+      }
+
+      // Proceed with navigation
+      Get.toNamed(route, arguments: arguments);
+    } catch (e) {
+      print('Error in safe navigation: $e');
+      _handleSafeFallbackNavigation();
+    }
+  }
+
+  /// Check if route requires authentication
+  static bool _isProtectedRoute(String route) {
+    const protectedRoutes = [
+      '/dashboard',
+      '/add-product',
+      '/edit-product',
+      '/add-employee',
+      '/employee-list',
+      '/manager-profile',
+      '/employee-dashboard',
+    ];
+    return protectedRoutes.contains(route);
+  }
+
+  /// Force clear all navigation stacks and go to safe route
+  static void forceResetNavigation() {
+    try {
+      print('🔄 SafeNavigation: Force resetting navigation stack');
+      
+      // Close all dialogs and overlays
+      if (Get.isDialogOpen == true) {
+        Get.until((route) => !Get.isDialogOpen!);
+      }
+      if (Get.isSnackbarOpen) {
+        Get.closeAllSnackbars();
+      }
+      
+      // Clear navigation stack and go to role selection
+      Get.offAllNamed('/role-selection');
+    } catch (e) {
+      print('Error in force reset navigation: $e');
     }
   }
 }

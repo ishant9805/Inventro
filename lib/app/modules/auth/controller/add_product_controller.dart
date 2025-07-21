@@ -122,13 +122,26 @@ class AddProductController extends GetxController {
         // Use WidgetsBinding to ensure safe navigation
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!_isDisposed) {
-            // Refresh the product list on dashboard if controller exists
+            // Try to update dashboard directly instead of full refresh to avoid loading issues
             try {
               final dashboardController = Get.isRegistered<DashboardController>()
                   ? Get.find<DashboardController>()
                   : null;
-              dashboardController?.refreshProducts();
-              print('✅ Dashboard refresh triggered');
+              
+              if (dashboardController != null) {
+                // Create a basic ProductModel from the submitted data for immediate UI update
+                // Note: We don't have the full server response with ID, so we'll do a smart refresh
+                print('✅ Dashboard controller found, triggering smart refresh');
+                
+                // Use a delayed refresh to ensure the backend has processed the addition
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  if (!_isDisposed) {
+                    dashboardController.refreshProducts();
+                  }
+                });
+              } else {
+                print('❌ Dashboard controller not found');
+              }
             } catch (e) {
               print('❌ Dashboard controller not found: $e');
             }
