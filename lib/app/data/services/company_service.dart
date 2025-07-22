@@ -209,4 +209,41 @@ class CompanyService {
     storage.remove('refresh_token');
     print('[CompanyService.clearTokens] All tokens cleared');
   }
+
+  // Get company employee count - Helper method for employee limit validation
+  Future<int> getCompanyEmployeeCount(String companyId) async {
+    try {
+      final endpoint = '$baseUrl/companies/$companyId/employees/count';
+      final uri = Uri.parse(endpoint);
+      
+      print('[CompanyService.getCompanyEmployeeCount] endpoint: $endpoint');
+      
+      // Retrieve token from secure storage
+      final storage = GetStorage();
+      final token = storage.read('token');
+      
+      final headers = {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      };
+      
+      final response = await http.get(uri, headers: headers);
+      
+      print('[CompanyService.getCompanyEmployeeCount] status: ${response.statusCode}');
+      print('[CompanyService.getCompanyEmployeeCount] body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+        final count = responseData['count'] ?? responseData['total'] ?? 0;
+        return count is int ? count : int.tryParse(count.toString()) ?? 0;
+      } else {
+        print('[CompanyService.getCompanyEmployeeCount] Request failed with status: ${response.statusCode}');
+        return 0;
+      }
+    } catch (e) {
+      print('[CompanyService.getCompanyEmployeeCount] Exception occurred: $e');
+      return 0;
+    }
+  }
 }

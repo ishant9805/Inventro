@@ -404,6 +404,449 @@ class DashboardController extends GetxController {
     }
   }
 
+  // ==================== INVENTORY FILTER METHODS ====================
+
+  /// Gets filtered products by type for bottom sheet display
+  List<ProductModel> getFilteredProductsByType(String filterType) {
+    switch (filterType.toLowerCase()) {
+      case 'total':
+        return products.toList();
+      case 'low_stock':
+        return lowStockProducts;
+      case 'expiring':
+        return expiringProducts;
+      case 'expired':
+        return expiredProducts;
+      default:
+        return products.toList();
+    }
+  }
+
+  /// Shows filtered products in a bottom sheet
+  void showFilteredProductsBottomSheet(String filterType, String title) {
+    if (_isDisposed) return;
+    
+    try {
+      final filteredList = getFilteredProductsByType(filterType);
+      
+      // Import the bottom sheet widget dynamically
+      Get.bottomSheet(
+        _buildInventoryBottomSheet(filteredList, title, filterType),
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        enableDrag: true,
+      );
+    } catch (e) {
+      print('❌ Error showing filtered products bottom sheet: $e');
+      _showErrorMessage('Unable to show filtered products');
+    }
+  }
+
+  /// Builds the inventory bottom sheet widget
+  Widget _buildInventoryBottomSheet(List<ProductModel> products, String title, String filterType) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      minChildSize: 0.5,
+      maxChildSize: 0.9,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              
+              // Header
+              Container(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _getFilterColor(filterType).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        _getFilterIcon(filterType),
+                        color: _getFilterColor(filterType),
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            '${products.length} ${products.length == 1 ? 'product' : 'products'}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Get.back(),
+                      icon: Icon(
+                        Icons.close,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Product list
+              Expanded(
+                child: products.isEmpty
+                    ? _buildEmptyFilterState(filterType)
+                    : ListView.builder(
+                        controller: scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        itemCount: products.length,
+                        itemBuilder: (context, index) {
+                          return _buildBottomSheetProductCard(products[index], filterType);
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Builds a product card for the bottom sheet
+  Widget _buildBottomSheetProductCard(ProductModel product, String filterType) {
+    final statusColor = _getProductStatusColor(product, filterType);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: statusColor.withOpacity(0.3), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(
+                    product.partNumber.isNotEmpty 
+                        ? product.partNumber.substring(0, 1).toUpperCase()
+                        : 'P',
+                    style: TextStyle(
+                      color: statusColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.partNumber,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      product.description,
+                      style: const TextStyle(
+                        color: Color(0xFF6C757D),
+                        fontSize: 14,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2196F3).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF2196F3)),
+                ),
+                child: Text(
+                  'Qty: ${product.quantity}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2196F3),
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Details section
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        'Location: ${product.location}',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(Icons.schedule, size: 16, color: Colors.grey[600]),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        'Expires: ${product.formattedExpiryDate}',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          // Status badge if applicable
+          if (_shouldShowStatusBadge(product, filterType)) ...[
+            const SizedBox(height: 12),
+            _buildStatusBadge(product, statusColor),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Builds status badge for products
+  Widget _buildStatusBadge(ProductModel product, Color statusColor) {
+    final isExpired = product.isExpired;
+    final daysUntilExpiry = product.daysUntilExpiry;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: statusColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isExpired ? Icons.error : Icons.warning,
+            color: statusColor,
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            isExpired 
+                ? 'EXPIRED'
+                : 'Expires in $daysUntilExpiry days',
+            style: TextStyle(
+              color: statusColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds empty state for filtered results
+  Widget _buildEmptyFilterState(String filterType) {
+    final config = _getEmptyStateConfig(filterType);
+    
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              config['icon'],
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              config['title'],
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              config['message'],
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Gets filter color based on type
+  Color _getFilterColor(String filterType) {
+    switch (filterType.toLowerCase()) {
+      case 'total':
+        return const Color(0xFF4A00E0);
+      case 'low_stock':
+        return const Color(0xFF800020);
+      case 'expiring':
+        return const Color(0xFFFFC107);
+      case 'expired':
+        return const Color(0xFFDC3545);
+      default:
+        return const Color(0xFF4A00E0);
+    }
+  }
+
+  /// Gets filter icon based on type
+  IconData _getFilterIcon(String filterType) {
+    switch (filterType.toLowerCase()) {
+      case 'total':
+        return Icons.inventory;
+      case 'low_stock':
+        return Icons.warning;
+      case 'expiring':
+        return Icons.schedule;
+      case 'expired':
+        return Icons.error;
+      default:
+        return Icons.inventory;
+    }
+  }
+
+  /// Gets product status color based on filter type and product state
+  Color _getProductStatusColor(ProductModel product, String filterType) {
+    if (filterType.toLowerCase() == 'expired' || product.isExpired) {
+      return const Color(0xFFDC3545);
+    } else if (filterType.toLowerCase() == 'expiring' || 
+               (product.daysUntilExpiry <= 30 && !product.isExpired)) {
+      return const Color(0xFFFFC107);
+    } else if (filterType.toLowerCase() == 'low_stock' || product.quantity <= 2) {
+      return const Color(0xFF800020);
+    } else {
+      return const Color(0xFF28A745);
+    }
+  }
+
+  /// Checks if status badge should be shown
+  bool _shouldShowStatusBadge(ProductModel product, String filterType) {
+    return product.isExpired || 
+           (product.daysUntilExpiry <= 30 && !product.isExpired) ||
+           filterType.toLowerCase() == 'expiring' ||
+           filterType.toLowerCase() == 'expired';
+  }
+
+  /// Gets empty state configuration
+  Map<String, dynamic> _getEmptyStateConfig(String filterType) {
+    switch (filterType.toLowerCase()) {
+      case 'total':
+        return {
+          'icon': Icons.inventory_2_outlined,
+          'title': 'No products found',
+          'message': 'Add your first product to get started',
+        };
+      case 'low_stock':
+        return {
+          'icon': Icons.trending_up,
+          'title': 'Great! No low stock items',
+          'message': 'All your products have adequate stock levels',
+        };
+      case 'expiring':
+        return {
+          'icon': Icons.schedule,
+          'title': 'No products expiring soon',
+          'message': 'All your products have plenty of time before expiry',
+        };
+      case 'expired':
+        return {
+          'icon': Icons.check_circle_outline,
+          'title': 'Excellent! No expired products',
+          'message': 'Keep up the good inventory management',
+        };
+      default:
+        return {
+          'icon': Icons.inventory_2_outlined,
+          'title': 'No products found',
+          'message': 'No products match the current filter',
+        };
+    }
+  }
+
   // ==================== STATE MANAGEMENT HELPERS ====================
 
   /// Sets the loading state safely

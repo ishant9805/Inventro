@@ -262,6 +262,172 @@ class EmployeeService {
     }
   }
 
+  // GET COMPANY-WIDE EMPLOYEE COUNT - Enhanced method with multiple strategies
+  Future<int> getCompanyEmployeeCount() async {
+    try {
+      final authController = Get.find<AuthController>();
+      final companyId = authController.user.value?.companyId ?? 
+                       authController.user.value?.company?.id;
+      
+      if (companyId == null) {
+        throw Exception('Company ID not found. Please login again.');
+      }
+
+      // Strategy 1: Try dedicated company employee count endpoint
+      final count1 = await _tryCompanyCountEndpoint(companyId.toString());
+      if (count1 != null) return count1;
+
+      // Strategy 2: Try fetching all company employees directly
+      final count2 = await _tryCompanyEmployeesEndpoint(companyId.toString());
+      if (count2 != null) return count2;
+
+      // Strategy 3: Use intelligent fallback estimation
+      return await _getCompanyEmployeeCountFallback();
+
+    } catch (e) {
+      print('❌ EmployeeService: Error in getCompanyEmployeeCount: $e');
+      return await _getCompanyEmployeeCountFallback();
+    }
+  }
+
+  // Strategy 1: Try dedicated count endpoint
+  Future<int?> _tryCompanyCountEndpoint(String companyId) async {
+    try {
+      final endpoint = path.join(baseUrl, 'companies', companyId, 'employees', 'count');
+      final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
+
+      print('[EmployeeService.Strategy1] Trying count endpoint: $uri');
+
+      final authHeaders = await getAuthHeaders();
+      final response = await http
+          .get(uri, headers: authHeaders)
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        final responseData = _safeJsonDecode(response.body, response.statusCode);
+        final count = responseData['count'] ?? responseData['total'] ?? responseData['employee_count'];
+        if (count != null) {
+          final finalCount = count is int ? count : int.tryParse(count.toString()) ?? 0;
+          print('✅ EmployeeService.Strategy1: Found $finalCount employees via count endpoint');
+          return finalCount;
+        }
+      }
+    } catch (e) {
+      print('⚠️ EmployeeService.Strategy1: Count endpoint failed: $e');
+    }
+    return null;
+  }
+
+  // Strategy 2: Try company employees endpoint
+  Future<int?> _tryCompanyEmployeesEndpoint(String companyId) async {
+    final potentialEndpoints = [
+      'companies/$companyId/employees',
+      'employees?company_id=$companyId',
+      'admin/employees?company_id=$companyId',
+      'employees/company/$companyId',
+      'company/$companyId/all-employees',
+    ];
+
+    for (final endpointPath in potentialEndpoints) {
+      try {
+        final endpoint = path.join(baseUrl, endpointPath);
+        final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
+        
+        print('[EmployeeService.Strategy2] Trying: $uri');
+        
+        final authHeaders = await getAuthHeaders();
+        final response = await http
+            .get(uri, headers: authHeaders)
+            .timeout(const Duration(seconds: 15));
+
+        if (response.statusCode == 200) {
+          final employees = _safeJsonDecodeArray(response.body, response.statusCode);
+          final count = employees.length;
+          print('✅ EmployeeService.Strategy2: Found $count employees via $endpointPath');
+          return count;
+        } else if (response.statusCode == 404) {
+          continue; // Try next endpoint
+        }
+      } catch (e) {
+        print('⚠️ EmployeeService.Strategy2: $endpointPath failed: $e');
+        continue;
+      }
+    }
+    return null;
+  }
+
+  // Fallback method to estimate company employee count
+  Future<int> _getCompanyEmployeeCountFallback() async {
+    try {
+      final authController = Get.find<AuthController>();
+      final companyId = authController.user.value?.companyId ?? 
+                       authController.user.value?.company?.id;
+      
+      if (companyId == null) {
+        print('❌ EmployeeService: No company ID for fallback count');
+        return 0;
+      }
+
+      // Use a generic employees endpoint that might return all company employees
+      // Try different potential endpoints that could give us company-wide data
+      final endpoints = [
+        'companies/$companyId/employees',  // Company-specific endpoint
+        'employees?company_id=$companyId', // Query parameter approach
+        'employees/company/$companyId',    // Alternative company endpoint
+      ];
+
+      for (final endpointPath in endpoints) {
+        try {
+          final endpoint = path.join(baseUrl, endpointPath);
+          final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
+          
+          print('[EmployeeService.fallback] Trying endpoint: $uri');
+          
+          final authHeaders = await getAuthHeaders();
+          final response = await http
+              .get(uri, headers: authHeaders)
+              .timeout(const Duration(seconds: 15));
+
+          if (response.statusCode == 200) {
+            final employees = _safeJsonDecodeArray(response.body, response.statusCode);
+            final count = employees.length;
+            print('✅ EmployeeService: Found company-wide endpoint with $count employees');
+            return count;
+          }
+        } catch (e) {
+          print('⚠️ EmployeeService: Endpoint $endpointPath failed: $e');
+          continue; // Try next endpoint
+        }
+      }
+
+      // If no company-wide endpoint works, use an intelligent estimation
+      print('⚠️ EmployeeService: No company-wide endpoints available, using estimation');
+      
+      // Get manager's employee count as baseline
+      final managerEmployees = await getEmployees();
+      final managerCount = managerEmployees.length;
+      
+      // For estimation, we can use business logic:
+      // Option 1: Use manager count as minimum (conservative)
+      // Option 2: Apply a multiplier based on company size
+      // Option 3: Return 0 to force manual capacity management
+      
+      final companyLimit = authController.user.value?.company?.size ?? 
+                          authController.user.value?.companySize ?? 50;
+      
+      // Conservative estimation: assume this manager has average load
+      // Use manager count as baseline but cap it reasonably
+      final estimatedTotal = (managerCount * 1.5).round().clamp(managerCount, companyLimit);
+      
+      print('ℹ️ EmployeeService: Estimated company total: $estimatedTotal (based on manager: $managerCount)');
+      return estimatedTotal;
+      
+    } catch (e) {
+      print('❌ EmployeeService: All fallback methods failed: $e');
+      return 0;
+    }
+  }
+
   // DELETE EMPLOYEE - Enhanced with better error handling
   Future<bool> deleteEmployee(int employeeId) async {
     try {

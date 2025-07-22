@@ -51,7 +51,7 @@ class AddEmployeeHeader extends StatelessWidget {
                   ),
                 ),
                 Obx(() => Text(
-                  'Current employees: ${controller.currentEmployeeCount.value}/10',
+                  'Company: ${controller.companyEmployeeCount.value}/${controller.companyEmployeeLimit.value} • Manager: ${controller.currentEmployeeCount.value}',
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 14,
