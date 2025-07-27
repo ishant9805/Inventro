@@ -25,22 +25,39 @@ class EmployeeLoginController extends GetxController {
 
     try {
       isLoading.value = true;
-      // Step 1: Call login API to get token
+      
+      // 🔧 STEP 1: Call login API to get token
       final tokenResult = await _authService.login(email, pin);
-      // Step 2: Use the token to fetch complete user profile
+      
+      // 🔧 STEP 2: Use the token to fetch complete user profile
       final userProfile = await _authService.fetchUserProfile(tokenResult.token, fallbackRole: 'employee');
-      // Step 3: Check if role is employee
+      
+      // 🔧 STEP 3: Validate that this is indeed an employee
       if (userProfile.role.toLowerCase() == 'employee') {
-        // Save user info in AuthController for token access
+        // Get AuthController and save user info properly
         final authController = Get.find<AuthController>();
+        
+        // 🔧 STEP 4: Set user in memory
         authController.user.value = userProfile;
-        // Navigate to employee dashboard
+        
+        // 🔧 STEP 5: Save user data to persistent storage for session persistence
+        // This ensures employee sessions persist across app restarts and are properly cleared on logout
+        await authController.saveUserToPrefs(userProfile);
+        
+        print('✅ EmployeeLoginController: Employee session established and persisted');
+        
+        // 🔧 STEP 6: Clear input fields after successful login
+        emailController.clear();
+        pinController.clear();
+        
+        // 🔧 STEP 7: Navigate to employee dashboard
         SafeNavigation.safeSnackbar(
           title: 'Success', 
           message: 'Login successful!'
         );
         Get.offAllNamed('/employee-dashboard');
       } else {
+        // User exists but is not an employee
         SafeNavigation.safeSnackbar(
           title: 'Login Failed', 
           message: 'You are not registered as an employee.'
@@ -49,7 +66,7 @@ class EmployeeLoginController extends GetxController {
     } catch (e) {
       SafeNavigation.safeSnackbar(
         title: 'Login Failed', 
-        message: e.toString()
+        message: e.toString().replaceAll('Exception: ', '')
       );
     } finally {
       isLoading.value = false;

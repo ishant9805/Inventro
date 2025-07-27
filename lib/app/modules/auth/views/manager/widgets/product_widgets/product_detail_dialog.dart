@@ -669,21 +669,24 @@ class ProductDetailDialog extends StatelessWidget {
   }
 
   Color _getStatusColor() {
-    if (_isExpired()) return const Color(0xFFDC3545);
-    if (_getDaysUntilExpiry() <= 2) return const Color(0xFFFFC107);
-    return const Color(0xFF28A745);
+    if (_isExpired()) return const Color(0xFFDC3545); // Red for expired
+    if (_getDaysUntilExpiry() <= 7 && _getDaysUntilExpiry() >= 0) return const Color(0xFFFFC107); // Amber for expiring within 7 days
+    if (_getQuantity() <= 1) return const Color(0xFF800020); // Dark red for low stock (≤1)
+    return const Color(0xFF28A745); // Green for good condition
   }
 
   IconData _getStatusIcon() {
     if (_isExpired()) return Icons.error;
-    if (_getDaysUntilExpiry() <= 30) return Icons.warning;
+    if (_getDaysUntilExpiry() <= 7 && _getDaysUntilExpiry() >= 0) return Icons.warning;
+    if (_getQuantity() <= 1) return Icons.warning;
     return Icons.check_circle;
   }
 
   String _getStatusText() {
     if (_isExpired()) return 'EXPIRED';
     int daysUntilExpiry = _getDaysUntilExpiry();
-    if (daysUntilExpiry <= 30) return 'Expires in $daysUntilExpiry days';
+    if (daysUntilExpiry <= 7 && daysUntilExpiry >= 0) return 'Expires in $daysUntilExpiry days';
+    if (_getQuantity() <= 1) return 'Low Stock';
     return 'Good Condition';
   }
 

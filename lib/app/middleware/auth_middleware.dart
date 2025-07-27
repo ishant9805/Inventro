@@ -118,6 +118,7 @@ class AuthMiddleware extends GetMiddleware {
 }
 
 /// Middleware to prevent authenticated users from accessing login/register screens
+/// 🔧 FIXED: Allow authenticated users to access login screens for account switching
 class GuestMiddleware extends GetMiddleware {
   @override
   int? get priority => 2;
@@ -129,7 +130,22 @@ class GuestMiddleware extends GetMiddleware {
     print('🛡️ GuestMiddleware: Checking guest access to route: $route');
     
     try {
-      // Check if user is authenticated
+      // 🔧 FIXED: Don't redirect authenticated users from login screens
+      // This allows employees to manually logout and login again without being auto-redirected
+      final guestOnlyRoutes = [
+        '/role-selection',
+        '/register',
+        '/manager-registration',
+        '/company-creation',
+      ];
+      
+      // Check if this is a guest-only route (not login screens)
+      if (!guestOnlyRoutes.contains(route)) {
+        print('✅ GuestMiddleware: Login screens are accessible to all users');
+        return null; // Allow access to login screens even for authenticated users
+      }
+      
+      // Check if user is authenticated only for guest-only routes
       bool isAuthenticated = false;
       UserModel? currentUser;
       
@@ -142,10 +158,10 @@ class GuestMiddleware extends GetMiddleware {
         isAuthenticated = false;
       }
 
-      if (isAuthenticated) {
-        print('🔄 GuestMiddleware: User is authenticated, redirecting from $route');
+      if (isAuthenticated && guestOnlyRoutes.contains(route)) {
+        print('🔄 GuestMiddleware: User is authenticated, redirecting from guest-only route $route');
         
-        // Redirect based on user role
+        // Redirect based on user role for guest-only routes
         final userRole = currentUser?.role.toLowerCase();
         if (userRole == 'employee') {
           return const RouteSettings(name: '/employee-dashboard');
@@ -154,7 +170,7 @@ class GuestMiddleware extends GetMiddleware {
         }
       }
 
-      print('✅ GuestMiddleware: Guest access granted to $route');
+      print('✅ GuestMiddleware: Access granted to $route');
       return null; // Allow navigation to continue
       
     } catch (e) {

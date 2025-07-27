@@ -298,7 +298,7 @@ class AuthController extends GetxController {
       // 🔧 STEP 2: Clear user state
       user.value = null;
       
-      // 🔧 STEP 3: Clear stored preferences
+      // 🔧 STEP 3: Clear stored preferences (CRITICAL for preventing auto-login)
       await clearUserPrefs();
       
       // 🔧 STEP 4: Clear any cached data
@@ -320,10 +320,37 @@ class AuthController extends GetxController {
       await Future.delayed(const Duration(milliseconds: 300)); // Give time for cleanup
       SafeNavigation.forceResetNavigation();
       
+      print('✅ AuthController: Logout completed successfully');
+      
     } catch (e) {
       print('❌ AuthController: Error during logout - $e');
       // Still navigate to role selection even if cleanup fails
       SafeNavigation.forceResetNavigation();
+    }
+  }
+
+  /// 🔧 NEW: Check if there's a valid session that should be restored
+  Future<bool> hasValidSessionToRestore() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('user_token');
+      final role = prefs.getString('user_role');
+      final email = prefs.getString('user_email');
+      
+      // Basic validation - must have token, role, and email
+      if (token == null || token.isEmpty ||
+          role == null || role.isEmpty ||
+          email == null || email.isEmpty) {
+        print('🔄 AuthController: No valid session data found');
+        return false;
+      }
+      
+      print('✅ AuthController: Valid session data found for ${role} user');
+      return true;
+      
+    } catch (e) {
+      print('❌ AuthController: Error checking session validity - $e');
+      return false;
     }
   }
 

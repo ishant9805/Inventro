@@ -9,7 +9,7 @@ import 'package:inventro/app/data/services/session_recovery_service.dart';
 void main() {
   // Initialize controllers and services
   Get.put(AuthController());
-  Get.put(DashboardController(), permanent: true); // Make it permanent instead of lazy
+  Get.put(DashboardController(), permanent: true); // Permanent to keep it alive across sessions
   Get.put(SessionRecoveryService()); // Initialize session recovery service
   
   runApp(const MyApp());

@@ -370,14 +370,17 @@ class DashboardController extends GetxController {
     }
   }
 
-  /// Gets products that are expiring soon (within 30 days)
+  /// Gets products that are expiring soon (within 7 days, excluding already expired)
   List<ProductModel> get expiringProducts {
     try {
       return products.where((product) {
         try {
+          // Only include products that are:
+          // 1. Not expired
+          // 2. Expiring within 7 days (0-7 days inclusive)
           return !product.isExpired && 
-                 product.daysUntilExpiry <= 30 && 
-                 product.daysUntilExpiry >= 0;
+                 product.daysUntilExpiry >= 0 && 
+                 product.daysUntilExpiry <= 7;
         } catch (e) {
           return false;
         }
@@ -388,12 +391,12 @@ class DashboardController extends GetxController {
     }
   }
 
-  /// Gets products with low stock (quantity <= 2)
+  /// Gets products with low stock (quantity ≤ 1)
   List<ProductModel> get lowStockProducts {
     try {
       return products.where((product) {
         try {
-          return product.quantity <= 2;
+          return product.quantity <= 1;
         } catch (e) {
           return false;
         }
@@ -794,9 +797,9 @@ class DashboardController extends GetxController {
     if (filterType.toLowerCase() == 'expired' || product.isExpired) {
       return const Color(0xFFDC3545);
     } else if (filterType.toLowerCase() == 'expiring' || 
-               (product.daysUntilExpiry <= 30 && !product.isExpired)) {
+               (product.daysUntilExpiry <= 7 && !product.isExpired)) {
       return const Color(0xFFFFC107);
-    } else if (filterType.toLowerCase() == 'low_stock' || product.quantity <= 2) {
+    } else if (filterType.toLowerCase() == 'low_stock' || product.quantity <= 1) {
       return const Color(0xFF800020);
     } else {
       return const Color(0xFF28A745);
@@ -806,7 +809,7 @@ class DashboardController extends GetxController {
   /// Checks if status badge should be shown
   bool _shouldShowStatusBadge(ProductModel product, String filterType) {
     return product.isExpired || 
-           (product.daysUntilExpiry <= 30 && !product.isExpired) ||
+           (product.daysUntilExpiry <= 7 && !product.isExpired) ||
            filterType.toLowerCase() == 'expiring' ||
            filterType.toLowerCase() == 'expired';
   }

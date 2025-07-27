@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:inventro/app/modules/auth/views/employee/employee_login_screen.dart';
-import 'package:inventro/app/modules/auth/views/employee/employee_dashboard.dart';
+import 'package:inventro/app/modules/auth/views/employee/dashboard/dashboard.dart';
 import 'package:inventro/app/modules/auth/views/manager/add_employee_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/add_product_screen.dart';
 import 'package:inventro/app/modules/auth/views/manager/edit_product_screen.dart';
@@ -46,6 +46,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.employeeLogin,
       page: () => EmployeeLoginScreen(),
+      middlewares: [GuestMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.register,
+      page: () => const ManagerRegistrationScreen(),
       middlewares: [GuestMiddleware()],
     ),
     GetPage(
@@ -101,10 +106,10 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
 
-    // FIXED: Protected employee routes with lazy bindings
+    // FIXED: Protected employee routes with lazy bindings - NEW MODULAR DASHBOARD
     GetPage(
       name: AppRoutes.employeeDashboard,
-      page: () => const EmployeeDashboard(),
+      page: () => const EmployeeDashboard(), // Using new modular dashboard
       binding: EmployeeDashboardBinding(), // Lazy loading
       middlewares: [AuthMiddleware()],
     ),

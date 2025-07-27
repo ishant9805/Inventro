@@ -371,15 +371,18 @@ class ProductGrid extends StatelessWidget {
     try {
       isExpired = product?.isExpired ?? false;
       final daysUntilExpiry = product?.daysUntilExpiry ?? 999;
-      isExpiringSoon = daysUntilExpiry <= 30 && !isExpired;
+      // Updated logic: expiring soon = within 7 days and not expired
+      isExpiringSoon = daysUntilExpiry <= 7 && daysUntilExpiry >= 0 && !isExpired;
       
-      // Determine status color based on expiry
+      // Determine status color based on expiry and stock
       if (isExpired) {
-        statusColor = const Color(0xFFDC3545);
-      } else if (daysUntilExpiry <= 2) {
-        statusColor = const Color(0xFFFFC107);
+        statusColor = const Color(0xFFDC3545); // Red for expired
+      } else if (isExpiringSoon) {
+        statusColor = const Color(0xFFFFC107); // Amber for expiring soon (within 7 days)
+      } else if (product?.quantity != null && product.quantity <= 1) {
+        statusColor = const Color(0xFF800020); // Dark red for low stock
       } else {
-        statusColor = const Color(0xFF28A745);
+        statusColor = const Color(0xFF28A745); // Green for good condition
       }
     } catch (e) {
       print('⚠️ Error processing product status: $e');

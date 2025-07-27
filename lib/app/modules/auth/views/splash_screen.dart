@@ -17,9 +17,22 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(const Duration(seconds: 2), () async {
       final authController = Get.find<AuthController>();
       await authController.loadUserFromPrefs();
+      
+      // 🔧 FIXED: Proper role-based routing for session restoration
       if (authController.user.value != null) {
-        Get.offAllNamed(AppRoutes.dashboard);
+        final userRole = authController.user.value!.role.toLowerCase();
+        print('🔄 SplashScreen: Restoring session for ${userRole} user');
+        
+        if (userRole == 'employee') {
+          // Employee session restoration - go directly to employee dashboard
+          Get.offAllNamed('/employee-dashboard');
+        } else {
+          // Manager/Admin session restoration - go to manager dashboard
+          Get.offAllNamed(AppRoutes.dashboard);
+        }
       } else {
+        // No saved session - go to role selection
+        print('🔄 SplashScreen: No saved session, going to role selection');
         Get.offAllNamed(AppRoutes.roleSelection);
       }
     });
