@@ -24,9 +24,10 @@ jobs:
           channel: stable
 
       - name: Install CocoaPods
+        if: exists('ios/Podfile')
         run: |
-          sudo gem install cocoapods
-          pod install --project-directory=ios
+          cd ios
+          pod install
 
       - name: Install Flutter dependencies
         run: flutter pub get
