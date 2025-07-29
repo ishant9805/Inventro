@@ -23,11 +23,14 @@ jobs:
           flutter-version: '3.32.7'
           channel: stable
 
-      - name: Install CocoaPods
-        if: exists('ios/Podfile')
+      - name: Install CocoaPods (if Podfile exists)
         run: |
-          cd ios
-          pod install
+          if [ -f ios/Podfile ]; then
+            cd ios
+            pod install
+          else
+            echo "No Podfile found. Skipping pod install."
+          fi
 
       - name: Install Flutter dependencies
         run: flutter pub get
