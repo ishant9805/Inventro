@@ -13,6 +13,7 @@ import 'package:inventro/app/modules/auth/views/splash_screen.dart';
 import '../modules/auth/views/manager/company_creation_page.dart';
 import '../modules/auth/views/manager/create_company_screen.dart';
 import '../modules/auth/views/manager/manager_registration_screen.dart';
+import '../modules/about_us/about_us_page.dart';
 // FIXED: Import all lazy bindings
 import '../modules/auth/bindings/dashboard_binding.dart';
 import '../modules/auth/bindings/employee_list_binding.dart';
@@ -112,6 +113,12 @@ class AppPages {
       page: () => const EmployeeDashboard(), // Using new modular dashboard
       binding: EmployeeDashboardBinding(), // Lazy loading
       middlewares: [AuthMiddleware()],
+    ),
+
+    // About Us route - accessible to both authenticated and non-authenticated users
+    GetPage(
+      name: AppRoutes.aboutUs,
+      page: () => const AboutUsPage(),
     ),
   ];
 }

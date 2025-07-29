@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/modules/auth/controller/employee_list_controller.dart';
-import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
+// import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 
 /// Header section showing team overview with employee count and statistics
 class EmployeeListHeader extends StatelessWidget {
@@ -61,29 +61,29 @@ class EmployeeListHeader extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Obx(() {
-              // Get company limit from AuthController
-              final authController = Get.find<AuthController>();
-              final companyLimit = authController.user.value?.company?.size ?? 
-                                 authController.user.value?.companySize ?? 
-                                 50;
+          // Container(
+          //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          //   decoration: BoxDecoration(
+          //     color: Colors.white.withOpacity(0.2),
+          //     borderRadius: BorderRadius.circular(20),
+          //   ),
+          //   child: Obx(() {
+          //     // Get company limit from AuthController
+          //     final authController = Get.find<AuthController>();
+          //     final companyLimit = authController.user.value?.company?.size ?? 
+          //                        authController.user.value?.companySize ?? 
+          //                        50;
               
-              return Text(
-                'Manager: ${controller.employees.length}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            }),
-          ),
+          //     return Text(
+          //       'Employees: ${controller.employees.length}',
+          //       style: const TextStyle(
+          //         color: Colors.white,
+          //         fontSize: 14,
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     );
+          //   }),
+          // ),
         ],
       ),
     );

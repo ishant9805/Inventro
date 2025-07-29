@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 import 'package:inventro/app/modules/auth/controller/employee_dashboard_controller.dart';
+import 'package:inventro/app/routes/app_routes.dart';
 
-/// Employee Profile Section - Shows employee profile information and logout option
+/// Employee Profile Section - Shows employee profile information and action buttons
 /// This is displayed when the profile button is tapped in the employee dashboard
 class EmployeeProfileSection extends StatelessWidget {
   final AuthController authController;
@@ -20,7 +21,7 @@ class EmployeeProfileSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
+        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -120,17 +121,22 @@ class EmployeeProfileSection extends StatelessWidget {
             
             const SizedBox(height: 24),
             
-            // Action buttons
-            Row(
+            // Action buttons - About Us positioned above logout
+            Column(
               children: [
-                Expanded(
+                // About Us Button
+                SizedBox(
+                  width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.close),
-                    label: const Text('Close'),
+                    onPressed: () {
+                      Get.back(); // Close profile dialog
+                      Get.toNamed(AppRoutes.aboutUs);
+                    },
+                    icon: const Icon(Icons.info_outline),
+                    label: const Text('About Us'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF6B7280),
-                      side: const BorderSide(color: Color(0xFF6B7280)),
+                      foregroundColor: const Color(0xFF4A00E0),
+                      side: const BorderSide(color: Color(0xFF4A00E0)),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -138,8 +144,12 @@ class EmployeeProfileSection extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
+                
+                const SizedBox(height: 12),
+                
+                // Logout Button
+                SizedBox(
+                  width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () => _handleLogout(),
                     icon: const Icon(Icons.logout, color: Colors.white),

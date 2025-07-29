@@ -159,6 +159,19 @@ class ProductModel {
     }
   }
 
+  // Helper method to check if product is expiring soon (within 7 days, but not expired)
+  bool get isExpiringSoon {
+    try {
+      if (isExpired) return false; // Expired products are not "expiring soon"
+      
+      final days = daysUntilExpiry;
+      return days >= 0 && days <= 7;
+    } catch (e) {
+      print('⚠️ Warning: Could not check expiring soon status');
+      return false;
+    }
+  }
+
   // Helper method to get days until expiry with error handling
   int get daysUntilExpiry {
     try {

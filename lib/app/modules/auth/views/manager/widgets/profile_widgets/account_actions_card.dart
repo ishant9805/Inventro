@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:inventro/app/modules/auth/controller/auth_controller.dart';
 import 'package:inventro/app/utils/safe_navigation.dart';
+import 'package:get/get.dart';
+import 'package:inventro/app/routes/app_routes.dart';
 
 
-/// Account actions card with logout functionality
+/// Account actions card with About Us and logout functionality
 class AccountActionsCard extends StatelessWidget {
   final AuthController authController;
 
@@ -33,6 +35,17 @@ class AccountActionsCard extends StatelessWidget {
           _buildSectionHeader('Account Actions', Icons.settings_outlined),
           const SizedBox(height: 20),
           
+          // About Us Button - positioned above logout as requested
+          _buildActionButton(
+            icon: Icons.info_outline,
+            label: 'About Us',
+            color: const Color(0xFF4A00E0),
+            onTap: () => Get.toNamed(AppRoutes.aboutUs),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Logout Button
           _buildActionButton(
             icon: Icons.logout,
             label: 'Logout',

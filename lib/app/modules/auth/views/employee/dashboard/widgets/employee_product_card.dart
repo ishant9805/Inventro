@@ -17,6 +17,17 @@ class EmployeeProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isExpired = product.isExpired;
+    final isExpiringSoon = product.isExpiringSoon;
+    
+    // Determine color scheme based on expiry status
+    Color statusColor;
+    if (isExpired) {
+      statusColor = Colors.red; // Red for expired products
+    } else if (isExpiringSoon) {
+      statusColor = const Color(0xFFFFC107); // Amber for expiring soon (7-day rule)
+    } else {
+      statusColor = const Color(0xFF28A745); // Default purple
+    }
     
     return GestureDetector(
       onTap: () => controller.showProductDetails(product),
@@ -28,14 +39,18 @@ class EmployeeProductCard extends StatelessWidget {
           border: Border.all(
             color: isExpired 
                 ? Colors.red.withOpacity(0.3)
-                : Colors.grey.withOpacity(0.2),
-            width: isExpired ? 2 : 1,
+                : isExpiringSoon 
+                    ? const Color(0xFFFFC107).withOpacity(0.3)
+                    : Colors.grey.withOpacity(0.2),
+            width: (isExpired || isExpiringSoon) ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
               color: isExpired 
                   ? Colors.red.withOpacity(0.1)
-                  : Colors.black.withOpacity(0.05),
+                  : isExpiringSoon
+                      ? const Color(0xFFFFC107).withOpacity(0.1)
+                      : Colors.black.withOpacity(0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -53,21 +68,19 @@ class EmployeeProductCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isExpired 
-                          ? Colors.red.withOpacity(0.1)
-                          : const Color(0xFF4A00E0).withOpacity(0.1),
+                      color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.inventory_2,
-                      color: isExpired ? Colors.red : const Color(0xFF4A00E0),
+                      color: statusColor,
                       size: 24,
                     ),
                   ),
                   
                   const SizedBox(width: 12),
                   
-                  // Product part number
+                  // Product part number and status badge
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,7 +90,11 @@ class EmployeeProductCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: isExpired ? Colors.red : const Color(0xFF1A202C),
+                            color: isExpired 
+                                ? Colors.red 
+                                : isExpiringSoon 
+                                    ? const Color(0xFFE67E00) // Darker amber for text readability
+                                    : const Color(0xFF1A202C),
                           ),
                         ),
                         if (isExpired)
@@ -96,6 +113,23 @@ class EmployeeProductCard extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                          )
+                        else if (isExpiringSoon)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            margin: const EdgeInsets.only(top: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFC107),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'EXPIRING SOON',
+                              style: TextStyle(
+                                color: Colors.black87, // Dark text for better contrast on amber
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                       ],
                     ),
@@ -105,12 +139,10 @@ class EmployeeProductCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: isExpired 
-                          ? Colors.red.withOpacity(0.1)
-                          : const Color(0xFF4A00E0).withOpacity(0.1),
+                      color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: isExpired ? Colors.red : const Color(0xFF4A00E0),
+                        color: statusColor,
                       ),
                     ),
                     child: Text(
@@ -118,7 +150,7 @@ class EmployeeProductCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: isExpired ? Colors.red : const Color(0xFF4A00E0),
+                        color: statusColor,
                       ),
                     ),
                   ),
@@ -132,7 +164,11 @@ class EmployeeProductCard extends StatelessWidget {
                 product.description,
                 style: TextStyle(
                   fontSize: 14,
-                  color: isExpired ? Colors.red.shade700 : const Color(0xFF6B7280),
+                  color: isExpired 
+                      ? Colors.red.shade700 
+                      : isExpiringSoon 
+                          ? const Color(0xFFE67E00) // Darker amber for readability
+                          : const Color(0xFF6B7280),
                   height: 1.4,
                 ),
                 maxLines: 2,
@@ -148,7 +184,11 @@ class EmployeeProductCard extends StatelessWidget {
                   Icon(
                     Icons.location_on,
                     size: 16,
-                    color: isExpired ? Colors.red : Colors.grey[600],
+                    color: isExpired 
+                        ? Colors.red 
+                        : isExpiringSoon 
+                            ? const Color(0xFFFFC107)
+                            : Colors.grey[600],
                   ),
                   const SizedBox(width: 4),
                   Expanded(
@@ -156,7 +196,11 @@ class EmployeeProductCard extends StatelessWidget {
                       product.location,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isExpired ? Colors.red.shade700 : Colors.grey[600],
+                        color: isExpired 
+                            ? Colors.red.shade700 
+                            : isExpiringSoon 
+                                ? const Color(0xFFE67E00)
+                                : Colors.grey[600],
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -168,15 +212,23 @@ class EmployeeProductCard extends StatelessWidget {
                   Icon(
                     Icons.schedule,
                     size: 16,
-                    color: isExpired ? Colors.red : Colors.grey[600],
+                    color: isExpired 
+                        ? Colors.red 
+                        : isExpiringSoon 
+                            ? const Color(0xFFFFC107)
+                            : Colors.grey[600],
                   ),
                   const SizedBox(width: 4),
                   Text(
                     product.formattedExpiryDate,
                     style: TextStyle(
                       fontSize: 12,
-                      color: isExpired ? Colors.red.shade700 : Colors.grey[600],
-                      fontWeight: isExpired ? FontWeight.w600 : FontWeight.normal,
+                      color: isExpired 
+                          ? Colors.red.shade700 
+                          : isExpiringSoon 
+                              ? const Color(0xFFE67E00)
+                              : Colors.grey[600],
+                      fontWeight: (isExpired || isExpiringSoon) ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
                 ],
@@ -192,7 +244,7 @@ class EmployeeProductCard extends StatelessWidget {
                     'Tap for details',
                     style: TextStyle(
                       fontSize: 11,
-                      color: isExpired ? Colors.red : const Color(0xFF4A00E0),
+                      color: statusColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -200,7 +252,7 @@ class EmployeeProductCard extends StatelessWidget {
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 12,
-                    color: isExpired ? Colors.red : const Color(0xFF4A00E0),
+                    color: statusColor,
                   ),
                 ],
               ),

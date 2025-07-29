@@ -277,9 +277,9 @@ class EmployeeService {
       final count1 = await _tryCompanyCountEndpoint(companyId.toString());
       if (count1 != null) return count1;
 
-      // Strategy 2: Try fetching all company employees directly
-      final count2 = await _tryCompanyEmployeesEndpoint(companyId.toString());
-      if (count2 != null) return count2;
+      // // Strategy 2: Try fetching all company employees directly
+      // final count2 = await _tryCompanyEmployeesEndpoint(companyId.toString());
+      // if (count2 != null) return count2;
 
       // Strategy 3: Use intelligent fallback estimation
       return await _getCompanyEmployeeCountFallback();
@@ -293,7 +293,7 @@ class EmployeeService {
   // Strategy 1: Try dedicated count endpoint
   Future<int?> _tryCompanyCountEndpoint(String companyId) async {
     try {
-      final endpoint = path.join(baseUrl, 'companies', companyId, 'employees', 'count');
+      final endpoint = path.join('${baseUrl}companies/$companyId/employees_and_managers');
       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
 
       print('[EmployeeService.Strategy1] Trying count endpoint: $uri');
@@ -305,7 +305,7 @@ class EmployeeService {
 
       if (response.statusCode == 200) {
         final responseData = _safeJsonDecode(response.body, response.statusCode);
-        final count = responseData['count'] ?? responseData['total'] ?? responseData['employee_count'];
+        final count = responseData["employees"] + responseData['managers'];
         if (count != null) {
           final finalCount = count is int ? count : int.tryParse(count.toString()) ?? 0;
           print('✅ EmployeeService.Strategy1: Found $finalCount employees via count endpoint');
@@ -318,43 +318,43 @@ class EmployeeService {
     return null;
   }
 
-  // Strategy 2: Try company employees endpoint
-  Future<int?> _tryCompanyEmployeesEndpoint(String companyId) async {
-    final potentialEndpoints = [
-      'companies/$companyId/employees',
-      'employees?company_id=$companyId',
-      'admin/employees?company_id=$companyId',
-      'employees/company/$companyId',
-      'company/$companyId/all-employees',
-    ];
+  // // Strategy 2: Try company employees endpoint
+  // Future<int?> _tryCompanyEmployeesEndpoint(String companyId) async {
+  //   final potentialEndpoints = [
+  //     'companies/$companyId/employees',
+  //     'employees?company_id=$companyId',
+  //     'admin/employees?company_id=$companyId',
+  //     'employees/company/$companyId',
+  //     'company/$companyId/all-employees',
+  //   ];
 
-    for (final endpointPath in potentialEndpoints) {
-      try {
-        final endpoint = path.join(baseUrl, endpointPath);
-        final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
+  //   for (final endpointPath in potentialEndpoints) {
+  //     try {
+  //       final endpoint = path.join(baseUrl, endpointPath);
+  //       final uri = Uri.parse(endpoint.replaceAll('\\', '/'));
         
-        print('[EmployeeService.Strategy2] Trying: $uri');
+  //       print('[EmployeeService.Strategy2] Trying: $uri');
         
-        final authHeaders = await getAuthHeaders();
-        final response = await http
-            .get(uri, headers: authHeaders)
-            .timeout(const Duration(seconds: 15));
+  //       final authHeaders = await getAuthHeaders();
+  //       final response = await http
+  //           .get(uri, headers: authHeaders)
+  //           .timeout(const Duration(seconds: 15));
 
-        if (response.statusCode == 200) {
-          final employees = _safeJsonDecodeArray(response.body, response.statusCode);
-          final count = employees.length;
-          print('✅ EmployeeService.Strategy2: Found $count employees via $endpointPath');
-          return count;
-        } else if (response.statusCode == 404) {
-          continue; // Try next endpoint
-        }
-      } catch (e) {
-        print('⚠️ EmployeeService.Strategy2: $endpointPath failed: $e');
-        continue;
-      }
-    }
-    return null;
-  }
+  //       if (response.statusCode == 200) {
+  //         final employees = _safeJsonDecodeArray(response.body, response.statusCode);
+  //         final count = employees.length;
+  //         print('✅ EmployeeService.Strategy2: Found $count employees via $endpointPath');
+  //         return count;
+  //       } else if (response.statusCode == 404) {
+  //         continue; // Try next endpoint
+  //       }
+  //     } catch (e) {
+  //       print('⚠️ EmployeeService.Strategy2: $endpointPath failed: $e');
+  //       continue;
+  //     }
+  //   }
+  //   return null;
+  // }
 
   // Fallback method to estimate company employee count
   Future<int> _getCompanyEmployeeCountFallback() async {

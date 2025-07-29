@@ -137,6 +137,21 @@ class EmployeeDashboardController extends GetxController {
   /// Builds the product detail dialog content
   Widget _buildProductDetailDialog(ProductModel product) {
     final isExpired = product.isExpired;
+    final isExpiringSoon = product.isExpiringSoon;
+    
+    // Determine status color based on expiry status
+    Color statusColor;
+    String statusText;
+    if (isExpired) {
+      statusColor = Colors.red;
+      statusText = 'EXPIRED';
+    } else if (isExpiringSoon) {
+      statusColor = const Color(0xFFFFC107);
+      statusText = 'EXPIRING SOON';
+    } else {
+      statusColor = const Color(0xFF4A00E0);
+      statusText = 'GOOD CONDITION';
+    }
     
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -155,14 +170,12 @@ class EmployeeDashboardController extends GetxController {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isExpired 
-                        ? Colors.red.withOpacity(0.1)
-                        : const Color(0xFF4A00E0).withOpacity(0.1),
+                    color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.inventory_2,
-                    color: isExpired ? Colors.red : const Color(0xFF4A00E0),
+                    color: statusColor,
                     size: 24,
                   ),
                 ),
@@ -176,20 +189,25 @@ class EmployeeDashboardController extends GetxController {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: isExpired ? Colors.red : const Color(0xFF1A202C),
+                          color: isExpired 
+                              ? Colors.red 
+                              : isExpiringSoon 
+                                  ? const Color(0xFFE67E00)
+                                  : const Color(0xFF1A202C),
                         ),
                       ),
-                      if (isExpired)
+                      if (isExpired || isExpiringSoon)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          margin: const EdgeInsets.only(top: 4),
                           decoration: BoxDecoration(
-                            color: Colors.red,
+                            color: statusColor,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'EXPIRED',
+                          child: Text(
+                            statusText,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: isExpiringSoon ? Colors.black87 : Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
@@ -215,9 +233,10 @@ class EmployeeDashboardController extends GetxController {
                     _buildDetailRow('Description', product.description),
                     _buildDetailRow('Location', product.location),
                     _buildDetailRow('Quantity', '${product.quantity}'),
-                    _buildDetailRow('Batch Number', product.batchNumber.toString()), // Fixed: convert int to string
+                    _buildDetailRow('Batch Number', product.batchNumber.toString()),
                     _buildDetailRow('Expiry Date', product.formattedExpiryDate),
-                    // Removed updatedOn reference as it doesn't exist in ProductModel
+                    if (isExpiringSoon)
+                      _buildDetailRow('Days Until Expiry', '${product.daysUntilExpiry} days'),
                   ],
                 ),
               ),
@@ -225,26 +244,67 @@ class EmployeeDashboardController extends GetxController {
             
             const SizedBox(height: 24),
             
-            // Close button
-            SizedBox(
+            // Status indicator with expiring soon warning
+            Container(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Get.back(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4A00E0),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: statusColor.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    isExpired 
+                        ? Icons.error 
+                        : isExpiringSoon 
+                            ? Icons.warning 
+                            : Icons.check_circle,
+                    color: statusColor,
+                    size: 24,
                   ),
-                ),
-                child: const Text(
-                  'Close',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          statusText,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: statusColor,
+                          ),
+                        ),
+                        if (isExpired)
+                          Text(
+                            'This product has expired and should not be used.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.red.shade700,
+                            ),
+                          )
+                        else if (isExpiringSoon)
+                          Text(
+                            'This product expires in ${product.daysUntilExpiry} day${product.daysUntilExpiry == 1 ? '' : 's'}. Use soon.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: const Color(0xFFE67E00),
+                            ),
+                          )
+                        else
+                          Text(
+                            'Product is in good condition.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: statusColor,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ],
