@@ -38,8 +38,8 @@ jobs:
       - name: Build iOS (debug)
         run: flutter build ios --debug --simulator
 
-      - name: Upload iOS build artifact (.app)
+      - name: Upload iOS Simulator Build
         uses: actions/upload-artifact@v4
         with:
-          name: ios-app
-          path: build/ios/iphoneos/Runner.app
+          name: ios-simulator-app
+          path: build/ios/**/Runner.app
