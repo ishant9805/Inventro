@@ -1,45 +1,42 @@
-name: Build Flutter iOS App
+name: iOS-ipa-build
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build iOS App (Unsigned)
+  build-ios:
+    name: 🎉 iOS Build
     runs-on: macos-latest
-    timeout-minutes: 30
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.7'
-          channel: stable
+          channel: 'stable'
+          architecture: x64
+      - run: flutter pub get
+      
 
-      - name: Install CocoaPods (if Podfile exists)
-        run: |
-          if [ -f ios/Podfile ]; then
-            cd ios
-            pod install
-          else
-            echo "No Podfile found. Skipping pod install."
-          fi
+      - run: pod repo update
+        working-directory: ios
 
-      - name: Install Flutter dependencies
-        run: flutter pub get
+      - run: flutter build ios --release --no-codesign
 
-      - name: Build iOS (debug)
-        run: flutter build ios --debug --simulator
+      - run: mkdir Payload
+        working-directory: build/ios/iphoneos
 
-      - name: Upload iOS Simulator Build
-        uses: actions/upload-artifact@v4
+      - run: mv Runner.app/ Payload
+        working-directory: build/ios/iphoneos
+
+      - name: Zip output
+        run: zip -qq -r -9 FlutterIpaExport.ipa Payload
+        working-directory: build/ios/iphoneos
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          name: ios-simulator-app
-          path: build/ios/**/Runner.app
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/ios/iphoneos/FlutterIpaExport.ipa
+          tag: v1.0
+          overwrite: true
+          body: "This is first release"
