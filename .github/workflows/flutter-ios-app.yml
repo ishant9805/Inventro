@@ -36,7 +36,7 @@ jobs:
         run: flutter pub get
 
       - name: Build iOS (debug)
-        run: flutter build ios --debug
+        run: flutter build ios --debug --simulator
 
       - name: Upload iOS build artifact (.app)
         uses: actions/upload-artifact@v4
