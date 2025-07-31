@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:inventro/app/utils/safe_navigation.dart';
 import 'widgets/about_us_header.dart';
 import 'widgets/team_members_section.dart';
