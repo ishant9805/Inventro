@@ -7,7 +7,7 @@ class TeamMembersSection extends StatelessWidget {
   // Team member data as specified in requirements
   static const List<Map<String, dynamic>> teamMembers = [
     {
-      'name': 'Gourav Rustagi',
+      'name': 'Neha Rustagi',
       'role': 'Operation Manager',
       'icon': Icons.admin_panel_settings,
       'color': Color(0xFF4A00E0),
